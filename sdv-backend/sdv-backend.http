@@ -1,0 +1,6 @@
+@sdv_backend_HostAddress = http://localhost:5237
+
+GET {{sdv_backend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
