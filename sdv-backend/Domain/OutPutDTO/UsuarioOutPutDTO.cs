@@ -1,4 +1,6 @@
-﻿namespace sdv_backend.Domain.OutPutDTO
+﻿using sdv_backend.Domain.Enum;
+
+namespace sdv_backend.Domain.OutPutDTO
 {
     public class UsuarioOutPutDTO
     {
@@ -8,6 +10,8 @@
         public string CorreoElectronico { get; set; } = string.Empty;
         public string Direccion { get; set; } = string.Empty;
         public string Telefono { get; set; } = string.Empty;
+
+        public UserType Tipo { get; set; } = UserType.None;
 
 
     }

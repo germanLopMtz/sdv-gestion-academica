@@ -26,7 +26,8 @@ namespace sdv_backend.Infraestructure.API_Services
                 CorreoElectronico = dto.CorreoElectronico,
                 Contrasena = dto.Contrasena,
                 Direccion = dto.Direccion,
-                Telefono = dto.Telefono
+                Telefono = dto.Telefono,
+                Tipo = dto.Tipo
             };
 
             _context.Usuarios.Add(entity);
@@ -38,7 +39,8 @@ namespace sdv_backend.Infraestructure.API_Services
                 NombreCompleto = entity.NombreCompleto,
                 CorreoElectronico = entity.CorreoElectronico,
                 Direccion = entity.Direccion,
-                Telefono = entity.Telefono
+                Telefono = entity.Telefono,
+                Tipo = entity.Tipo
             };
         }
 
@@ -53,7 +55,8 @@ namespace sdv_backend.Infraestructure.API_Services
                 NombreCompleto = entity.NombreCompleto,
                 CorreoElectronico = entity.CorreoElectronico,
                 Direccion = entity.Direccion,
-                Telefono = entity.Telefono
+                Telefono = entity.Telefono,
+                Tipo = entity.Tipo
             };
         }
 
@@ -67,7 +70,8 @@ namespace sdv_backend.Infraestructure.API_Services
                 NombreCompleto = u.NombreCompleto,
                 CorreoElectronico = u.CorreoElectronico,
                 Direccion = u.Direccion,
-                Telefono = u.Telefono
+                Telefono = u.Telefono,
+                Tipo = u.Tipo
             }).ToList();
         }
 
@@ -81,6 +85,7 @@ namespace sdv_backend.Infraestructure.API_Services
             entity.Contrasena = dto.Contrasena;
             entity.Direccion = dto.Direccion;
             entity.Telefono = dto.Telefono;
+            entity.Tipo = dto.Tipo;
 
             await _context.SaveChangesAsync();
 
@@ -90,7 +95,8 @@ namespace sdv_backend.Infraestructure.API_Services
                 NombreCompleto = entity.NombreCompleto,
                 CorreoElectronico = entity.CorreoElectronico,
                 Direccion = entity.Direccion,
-                Telefono = entity.Telefono
+                Telefono = entity.Telefono,
+                Tipo = entity.Tipo
             };
         }
 
@@ -118,7 +124,8 @@ namespace sdv_backend.Infraestructure.API_Services
                 NombreCompleto = usuario.NombreCompleto,
                 CorreoElectronico = usuario.CorreoElectronico,
                 Direccion = usuario.Direccion,
-                Telefono = usuario.Telefono
+                Telefono = usuario.Telefono,
+                Tipo = usuario.Tipo
             };
         }
 

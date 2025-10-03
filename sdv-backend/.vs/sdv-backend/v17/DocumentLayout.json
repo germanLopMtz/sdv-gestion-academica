@@ -3,36 +3,12 @@
   "WorkspaceRootPath": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\infraestructure\\api_service\\alumnoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:infraestructure\\api_service\\alumnoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\infraestructure\\api_service_interfaces\\ialumnoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:infraestructure\\api_service_interfaces\\ialumnoservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\infraestructure\\api_service_interfaces\\iusuarioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:infraestructure\\api_service_interfaces\\iusuarioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\infraestructure\\api_service\\usuarioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:infraestructure\\api_service\\usuarioservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\domain\\outputdto\\alumnooutputdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:domain\\outputdto\\alumnooutputdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\domain\\dtos\\alumnosdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:domain\\dtos\\alumnosdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\data\\datadb\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:data\\datadb\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\data\\entities\\alumno.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:data\\entities\\alumno.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|c:\\users\\lopez\\onedrive\\escritorio\\semestre 7\\desarrollo de software\\sdv\\sdv-gestion-academica\\sdv-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FCE9A599-2D04-4453-906B-85FEC92A541E}|sdv-backend.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -42,110 +18,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 0,
               "Title": "UsuarioService.cs",
               "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service\\UsuarioService.cs",
               "RelativeDocumentMoniker": "Infraestructure\\API_Service\\UsuarioService.cs",
-              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service\\UsuarioService.cs",
-              "RelativeToolTip": "Infraestructure\\API_Service\\UsuarioService.cs",
-              "ViewState": "AgIAAGAAAAAAAAAAAAAcwH4AAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service\\UsuarioService.cs*",
+              "RelativeToolTip": "Infraestructure\\API_Service\\UsuarioService.cs*",
+              "ViewState": "AgIAACMAAAAAAAAAAAAEwDkAAAArAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-03T07:16:28.058Z",
+              "WhenOpened": "2025-10-03T09:36:25.584Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "IAlumnoService.cs",
-              "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service_Interfaces\\IAlumnoService.cs",
-              "RelativeDocumentMoniker": "Infraestructure\\API_Service_Interfaces\\IAlumnoService.cs",
-              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service_Interfaces\\IAlumnoService.cs",
-              "RelativeToolTip": "Infraestructure\\API_Service_Interfaces\\IAlumnoService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB0AAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-03T07:30:28.59Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "AlumnoService.cs",
-              "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service\\AlumnoService.cs",
-              "RelativeDocumentMoniker": "Infraestructure\\API_Service\\AlumnoService.cs",
-              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service\\AlumnoService.cs",
-              "RelativeToolTip": "Infraestructure\\API_Service\\AlumnoService.cs",
-              "ViewState": "AgIAAEsAAAAAAAAAAAAYwGMAAAA2AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-03T07:30:16.274Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "AppDBContext.cs",
-              "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Data\\DataDB\\AppDBContext.cs",
-              "RelativeDocumentMoniker": "Data\\DataDB\\AppDBContext.cs",
-              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Data\\DataDB\\AppDBContext.cs",
-              "RelativeToolTip": "Data\\DataDB\\AppDBContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-03T07:13:40.087Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AlumnoOutPutDTO.cs",
-              "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Domain\\OutPutDTO\\AlumnoOutPutDTO.cs",
-              "RelativeDocumentMoniker": "Domain\\OutPutDTO\\AlumnoOutPutDTO.cs",
-              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Domain\\OutPutDTO\\AlumnoOutPutDTO.cs",
-              "RelativeToolTip": "Domain\\OutPutDTO\\AlumnoOutPutDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-03T07:11:04.813Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "IUsuarioService.cs",
-              "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service_Interfaces\\IUsuarioService.cs",
-              "RelativeDocumentMoniker": "Infraestructure\\API_Service_Interfaces\\IUsuarioService.cs",
-              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Infraestructure\\API_Service_Interfaces\\IUsuarioService.cs",
-              "RelativeToolTip": "Infraestructure\\API_Service_Interfaces\\IUsuarioService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAA5AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-03T07:10:22.956Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "Alumno.cs",
-              "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Data\\Entities\\Alumno.cs",
-              "RelativeDocumentMoniker": "Data\\Entities\\Alumno.cs",
-              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Data\\Entities\\Alumno.cs",
-              "RelativeToolTip": "Data\\Entities\\Alumno.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAXAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-03T07:13:03.341Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "AlumnosDTO.cs",
-              "DocumentMoniker": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Domain\\DTOs\\AlumnosDTO.cs",
-              "RelativeDocumentMoniker": "Domain\\DTOs\\AlumnosDTO.cs",
-              "ToolTip": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\Domain\\DTOs\\AlumnosDTO.cs",
-              "RelativeToolTip": "Domain\\DTOs\\AlumnosDTO.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-10-03T07:11:42.498Z",
+              "WhenOpened": "2025-10-03T09:35:00.262Z",
               "EditorCaption": ""
             }
           ]
