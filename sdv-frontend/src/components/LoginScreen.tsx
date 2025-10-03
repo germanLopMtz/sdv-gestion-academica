@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { usuariosApi } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,10 +13,18 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (usuario && password) {
-      onLogin();
+    if (!usuario || !password) return;
+    try {
+      const res = await usuariosApi.login({ CorreoElectronico: usuario, Contrasena: password });
+      if (res.status >= 200 && res.status < 300) {
+        onLogin();
+      }
+    } catch (error) {
+      console.error('Error de login', error);
+      // Puedes reemplazar por un toast si lo prefieres
+      alert('Credenciales inválidas');
     }
   };
 

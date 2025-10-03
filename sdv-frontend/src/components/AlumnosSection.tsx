@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,18 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
+import { alumnosApi } from '@/services/api';
+
+// Mapas para traducir enums del backend a etiquetas legibles
+const cursoTypeToLabel: Record<number, string> = {
+  1: 'Seminario',
+  2: 'Diplomado',
+};
+
+const modalidadToLabel: Record<number, string> = {
+  1: 'presencial',
+  2: 'virtual',
+};
 
 const AlumnosSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -76,25 +88,34 @@ const AlumnosSection = () => {
       setSelectedStudents(prev => [...prev, id]);
       if (selectedStudents.length === 0) {
         // Si es el primer alumno seleccionado, cargar sus datos para edición
-        const student = alumnos.find(a => a.id === id);
+        const baseList: any[] = (alumnos.length ? alumnos : alumnosMock);
+        const student = baseList.find(a => (a.id ?? a.Id) === id);
         if (student) {
-          const tipoCurso = student.curso.includes('Diplomado') ? 'Diplomado' : 'Seminario';
-          const numeroDiplomado = student.curso.includes('Diplomado') 
-            ? student.curso.split('N')[1] 
+          const cursoStr = student.curso ?? (student.TipoDeCurso === 2 ? 'Diplomado' : (student.TipoDeCurso === 1 ? 'Seminario' : ''));
+          const tipoCurso = cursoStr.includes('Diplomado') ? 'Diplomado' : 'Seminario';
+          const numeroDiplomado = cursoStr.includes('Diplomado') 
+            ? (cursoStr.split('N')[1] ?? '') 
             : '';
           
-          const [day, month, year] = student.fechaNac.split('-');
-          const fechaNac = `${year}-${month}-${day}`;
+          const fechaNacStr = student.fechaNac ?? student.FechaNacimiento ?? '';
+          let fechaNac = '';
+          if (typeof fechaNacStr === 'string' && fechaNacStr.includes('-') && fechaNacStr.length >= 8) {
+            const parts = fechaNacStr.includes('T') ? fechaNacStr.split('T')[0].split('-') : fechaNacStr.split('-');
+            if (parts.length === 3) {
+              const [y, m, d] = parts;
+              fechaNac = `${y}-${m}-${d}`;
+            }
+          }
           
           setNewStudent({
-            nombre: student.nombre,
+            nombre: student.nombre ?? student.NombreCompleto ?? '',
             tipoCurso,
             numeroDiplomado,
-            curso: student.curso,
-            fechaNac,
-            telefono: student.telefono,
-            email: student.email,
-            procedencia: student.procedencia,
+            curso: cursoStr,
+            fechaNac: fechaNac,
+            telefono: student.telefono ?? student.Telefono ?? '',
+            email: student.email ?? student.CorreoElectronico ?? '',
+            procedencia: student.procedencia ?? student.Procedencia ?? '',
             modalidad: 'presencial'
           });
         }
@@ -126,7 +147,7 @@ const AlumnosSection = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isEditing && selectedStudents.length > 0) {
       // Convertir la fecha de vuelta al formato DD-MM-YYYY para guardar
       const [year, month, day] = newStudent.fechaNac.split('-');
@@ -136,20 +157,36 @@ const AlumnosSection = () => {
         ...newStudent,
         fechaNac: fechaNacFormateada
       };
-      // Aquí iría la lógica para actualizar los alumnos seleccionados
-      console.log('Actualizando alumnos:', studentToUpdate);
+      try {
+        // Suponemos editar el primero seleccionado
+        const id = selectedStudents[0];
+        await alumnosApi.update(id, studentToUpdate);
+        const res = await alumnosApi.getAll<any[]>();
+        setAlumnos(res.data);
+      } catch (e) {
+        console.error('Error al actualizar', e);
+      }
     } else {
       // Convertir la fecha al formato DD-MM-YYYY para guardar
       const [year, month, day] = newStudent.fechaNac.split('-');
       const fechaNacFormateada = `${day}-${month}-${year}`;
       
-      const newStudentsToAdd = selectedStudents.map(id => ({
-        ...newStudent,
-        id,
-        fechaNac: fechaNacFormateada
-      }));
-      // Aquí iría la lógica para agregar los nuevos alumnos
-      console.log('Nuevos alumnos:', newStudentsToAdd);
+      const payload = {
+        NombreCompleto: newStudent.nombre,
+        FechaNacimiento: new Date(`${year}-${month}-${day}`).toISOString(),
+        Telefono: newStudent.telefono,
+        CorreoElectronico: newStudent.email,
+        Procedencia: newStudent.procedencia,
+        TipoDeCurso: newStudent.tipoCurso === 'Diplomado' ? 2 : 1,
+        Modalidad: newStudent.modalidad === 'virtual' ? 2 : 1,
+      };
+      try {
+        await alumnosApi.create(payload);
+        const res = await alumnosApi.getAll<any[]>();
+        setAlumnos(res.data);
+      } catch (e) {
+        console.error('Error al crear alumno', e);
+      }
     }
     
     setIsModalOpen(false);
@@ -211,7 +248,20 @@ const AlumnosSection = () => {
     });
   };
   
-  const alumnos = [
+  const [alumnos, setAlumnos] = useState<any[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await alumnosApi.getAll<any[]>();
+        setAlumnos(res.data);
+      } catch (e) {
+        console.error('Error al cargar alumnos', e);
+      }
+    })();
+  }, []);
+
+  const alumnosMock = [
     {
       id: 1,
       nombre: 'Sarah Alicia Gutiérrez Hernández',
@@ -564,11 +614,40 @@ const AlumnosSection = () => {
     }
   ];
 
-  const filteredAlumnos = alumnos.filter(alumno => {
+  const list = (alumnos.length ? alumnos : alumnosMock);
+  const normalized = list.map((alumno: any) => {
+    const id = alumno.id ?? alumno.Id ?? alumno.alumnoId ?? alumno.AlumnoId;
+    const tipoDeCursoNum = Number(alumno.TipoDeCurso ?? alumno.tipoDeCurso ?? alumno.cursoTipo ?? alumno.curso_type);
+    const modalidadNum = Number(alumno.Modalidad ?? alumno.modalidad);
+    const nombre = alumno.nombre ?? alumno.NombreCompleto ?? alumno.nombreCompleto ?? '';
+    const curso = alumno.curso ?? (cursoTypeToLabel[tipoDeCursoNum] ?? '');
+    const fechaNacIso = alumno.fechaNac ?? alumno.FechaNacimiento ?? alumno.fechaNacimiento ?? '';
+    let fechaNac = '';
+    if (fechaNacIso) {
+      try {
+        const date = new Date(fechaNacIso);
+        const dd = String(date.getDate()).padStart(2, '0');
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const yyyy = date.getFullYear();
+        fechaNac = `${dd}-${mm}-${yyyy}`;
+      } catch {
+        fechaNac = String(fechaNacIso);
+      }
+    }
+    const telefono = alumno.telefono ?? alumno.Telefono ?? '';
+    const email = alumno.email ?? alumno.CorreoElectronico ?? alumno.correoElectronico ?? '';
+    const procedencia = alumno.procedencia ?? alumno.Procedencia ?? alumno.procedencia ?? '';
+    const modalidad = typeof alumno.modalidad === 'number'
+      ? (modalidadToLabel[modalidadNum] ?? String(alumno.modalidad))
+      : (alumno.modalidad ?? (modalidadToLabel[modalidadNum] ?? ''));
+    return { id, nombre, curso, fechaNac, telefono, email, procedencia, modalidad };
+  });
+
+  const filteredAlumnos = normalized.filter(alumno => {
     const matchesSearch = searchTerm === '' || 
-      alumno.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      alumno.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      alumno.curso.toLowerCase().includes(searchTerm.toLowerCase());
+      (alumno.nombre ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (alumno.email ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (alumno.curso ?? '').toLowerCase().includes(searchTerm.toLowerCase());
 
     // Si no hay filtros activos, solo aplicar búsqueda
     if (Object.keys(activeFilters).length === 0) {
