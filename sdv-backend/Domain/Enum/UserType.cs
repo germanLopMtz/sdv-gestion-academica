@@ -5,6 +5,6 @@
         None = 0,
         Admin = 1,
         Maestro = 2,
-        Alumno = 3,
+
     }
 }

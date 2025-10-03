@@ -3,7 +3,7 @@ using sdv_backend.Domain.Enum;
 
 namespace sdv_backend.Data.Entities
 {
-    public class Usuario
+    public class Usuario //Admin y Maestros
     {
         public int Id { get; set; }
         public string NombreCompleto { get; set; } = string.Empty;
