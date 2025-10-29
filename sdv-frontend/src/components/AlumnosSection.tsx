@@ -106,6 +106,9 @@ const AlumnosSection = () => {
               fechaNac = `${y}-${m}-${d}`;
             }
           }
+          const modalidadLabel = typeof student.Modalidad === 'number'
+            ? (modalidadToLabel[Number(student.Modalidad)] ?? 'presencial')
+            : (student.modalidad ?? 'presencial');
           
           setNewStudent({
             nombre: student.nombre ?? student.NombreCompleto ?? '',
@@ -116,7 +119,7 @@ const AlumnosSection = () => {
             telefono: student.telefono ?? student.Telefono ?? '',
             email: student.email ?? student.CorreoElectronico ?? '',
             procedencia: student.procedencia ?? student.Procedencia ?? '',
-            modalidad: 'presencial'
+            modalidad: modalidadLabel
           });
         }
       }
@@ -141,7 +144,7 @@ const AlumnosSection = () => {
 
   const handleSelectAll = (isSelected: boolean) => {
     if (isSelected) {
-      setSelectedStudents(alumnos.map(alumno => alumno.id));
+      setSelectedStudents(filteredAlumnos.map(alumno => alumno.id));
     } else {
       setSelectedStudents([]);
     }
@@ -149,18 +152,21 @@ const AlumnosSection = () => {
 
   const handleSubmit = async () => {
     if (isEditing && selectedStudents.length > 0) {
-      // Convertir la fecha de vuelta al formato DD-MM-YYYY para guardar
+      // Mapear al DTO del backend
       const [year, month, day] = newStudent.fechaNac.split('-');
-      const fechaNacFormateada = `${day}-${month}-${year}`;
-      
-      const studentToUpdate = {
-        ...newStudent,
-        fechaNac: fechaNacFormateada
+      const payload = {
+        NombreCompleto: newStudent.nombre,
+        FechaNacimiento: new Date(`${year}-${month}-${day}`).toISOString(),
+        Telefono: newStudent.telefono,
+        CorreoElectronico: newStudent.email,
+        Procedencia: newStudent.procedencia,
+        TipoDeCurso: newStudent.tipoCurso === 'Diplomado' ? 2 : 1,
+        Modalidad: newStudent.modalidad === 'virtual' ? 2 : 1,
       };
       try {
         // Suponemos editar el primero seleccionado
         const id = selectedStudents[0];
-        await alumnosApi.update(id, studentToUpdate);
+        await alumnosApi.update(id, payload);
         const res = await alumnosApi.getAll<any[]>();
         setAlumnos(res.data);
       } catch (e) {
@@ -208,16 +214,98 @@ const AlumnosSection = () => {
 
   const handleEdit = () => {
     if (selectedStudents.length > 0) {
+      const id = selectedStudents[0];
+      
+      // Buscar en la lista de alumnos del backend o en mock
+      const list = (alumnos.length ? alumnos : alumnosMock);
+      const student = list.find((a: any) => (a.id ?? a.Id) === id);
+      
+      if (student) {
+        // Obtener tipo de curso
+        const tipoDeCursoNum = Number(student.TipoDeCurso ?? student.tipoDeCurso ?? 0);
+        const esDiplomado = tipoDeCursoNum === 2;
+        const tipoCurso = esDiplomado ? 'Diplomado' : 'Seminario';
+        
+        // Obtener curso completo
+        const cursoStr = student.curso ?? (esDiplomado ? 'Diplomado' : 'Seminario');
+        const numeroDiplomado = esDiplomado && cursoStr.includes('N')
+          ? (cursoStr.match(/N(\d+)/)?.[1] ?? '')
+          : '';
+        
+        // Manejar fecha - convertir a formato YYYY-MM-DD para input date
+        let fechaNac = '';
+        const fechaRaw = student.fechaNac ?? student.FechaNacimiento ?? student.fechaNacimiento ?? '';
+        if (fechaRaw) {
+          try {
+            // Si es string ISO, parsearlo
+            if (typeof fechaRaw === 'string' && fechaRaw.includes('T')) {
+              const date = new Date(fechaRaw);
+              const yyyy = String(date.getFullYear());
+              const mm = String(date.getMonth() + 1).padStart(2, '0');
+              const dd = String(date.getDate()).padStart(2, '0');
+              fechaNac = `${yyyy}-${mm}-${dd}`;
+            } else if (typeof fechaRaw === 'string' && fechaRaw.includes('-')) {
+              // Si viene en formato DD-MM-YYYY o YYYY-MM-DD
+              const partes = fechaRaw.split('-');
+              if (partes.length === 3) {
+                // Detectar formato: si el primer elemento tiene 4 dígitos es YYYY-MM-DD
+                if (partes[0].length === 4) {
+                  fechaNac = fechaRaw.split('T')[0]; // Ya está en formato correcto
+                } else {
+                  // Es DD-MM-YYYY, convertir a YYYY-MM-DD
+                  const [dd, mm, yyyy] = partes;
+                  fechaNac = `${yyyy}-${mm}-${dd}`;
+                }
+              }
+            } else {
+              // Intentar parsear como fecha
+              const date = new Date(fechaRaw);
+              if (!isNaN(date.getTime())) {
+                const yyyy = String(date.getFullYear());
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                fechaNac = `${yyyy}-${mm}-${dd}`;
+              }
+            }
+          } catch {
+            fechaNac = '';
+          }
+        }
+        
+        // Obtener modalidad
+        const modalidadNum = Number(student.Modalidad ?? student.modalidad ?? 1);
+        const modalidadLabel = typeof student.Modalidad === 'number' || typeof student.modalidad === 'number'
+          ? (modalidadToLabel[modalidadNum] ?? 'presencial')
+          : (student.modalidad ?? 'presencial');
+        
+        setNewStudent({
+          nombre: student.nombre ?? student.NombreCompleto ?? '',
+          tipoCurso,
+          numeroDiplomado,
+          curso: cursoStr,
+          fechaNac: fechaNac,
+          telefono: student.telefono ?? student.Telefono ?? '',
+          email: student.email ?? student.CorreoElectronico ?? '',
+          procedencia: student.procedencia ?? student.Procedencia ?? '',
+          modalidad: modalidadLabel
+        });
+      }
       setIsEditing(true);
       setIsModalOpen(true);
     }
   };
 
-  const handleDelete = () => {
-    // Aquí iría la lógica para eliminar los alumnos seleccionados
-    console.log('Eliminando alumnos:', selectedStudents);
-    setSelectedStudents([]);
-    setIsDeleteModalOpen(false);
+  const handleDelete = async () => {
+    try {
+      await Promise.all(selectedStudents.map(id => alumnosApi.remove(id)));
+      const res = await alumnosApi.getAll<any[]>();
+      setAlumnos(res.data);
+    } catch (e) {
+      console.error('Error al eliminar alumnos', e);
+    } finally {
+      setSelectedStudents([]);
+      setIsDeleteModalOpen(false);
+    }
   };
 
   const handleFilterChange = (key: string, value: string) => {
@@ -900,7 +988,25 @@ const AlumnosSection = () => {
         </Dialog>
 
         {/* Modal para agregar/editar alumno */}
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog open={isModalOpen} onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) {
+            // Limpiar formulario al cerrar
+            setIsEditing(false);
+            setSelectedStudents([]);
+            setNewStudent({
+              nombre: '',
+              tipoCurso: '',
+              numeroDiplomado: '',
+              curso: '',
+              fechaNac: '',
+              telefono: '',
+              email: '',
+              procedencia: '',
+              modalidad: 'presencial'
+            });
+          }
+        }}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-800">
@@ -1019,6 +1125,17 @@ const AlumnosSection = () => {
                   setIsModalOpen(false);
                   setIsEditing(false);
                   setSelectedStudents([]);
+                  setNewStudent({
+                    nombre: '',
+                    tipoCurso: '',
+                    numeroDiplomado: '',
+                    curso: '',
+                    fechaNac: '',
+                    telefono: '',
+                    email: '',
+                    procedencia: '',
+                    modalidad: 'presencial'
+                  });
                 }}
                 className="border-gray-300 hover:bg-gray-100"
               >
@@ -1031,6 +1148,17 @@ const AlumnosSection = () => {
                     setIsModalOpen(false);
                     setIsEditing(false);
                     setSelectedStudents([]);
+                    setNewStudent({
+                      nombre: '',
+                      tipoCurso: '',
+                      numeroDiplomado: '',
+                      curso: '',
+                      fechaNac: '',
+                      telefono: '',
+                      email: '',
+                      procedencia: '',
+                      modalidad: 'presencial'
+                    });
                   }}
                   className="border-gray-300 hover:bg-gray-100"
                 >
