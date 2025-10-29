@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("sdv-backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0c77b1b1729df0c511413cdb9b8e7153fba954e2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bfb9e1e3276492f200acd8b1e488e6cc68138067")]
 [assembly: System.Reflection.AssemblyProductAttribute("sdv-backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("sdv-backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

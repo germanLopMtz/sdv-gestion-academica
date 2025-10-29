@@ -572,46 +572,7 @@ const AlumnosSection = () => {
       procedencia: 'Guaymas, Son. MX',
       modalidad: 'virtual'
     },
-    {
-      id: 32,
-      nombre: 'Natalia Guadalupe Herrera',
-      curso: 'Seminario',
-      fechaNac: '05-11-2004',
-      telefono: '52 6624567890',
-      email: 'natalia.herrera@gmail.com',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 33,
-      nombre: 'Diego Antonio Ramírez',
-      curso: 'Diplomado N6',
-      fechaNac: '18-07-2005',
-      telefono: '52 6625678901',
-      email: 'diego.ramirez@gmail.com',
-      procedencia: 'Ciudad Obregón, Son. MX',
-      modalidad: 'virtual'
-    },
-    {
-      id: 34,
-      nombre: 'María José Sánchez',
-      curso: 'Seminario',
-      fechaNac: '01-04-2003',
-      telefono: '52 6626789012',
-      email: 'maria.sanchez@gmail.com',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 35,
-      nombre: 'Carlos Eduardo Luna',
-      curso: 'Diplomado N5',
-      fechaNac: '14-12-2004',
-      telefono: '52 6627890123',
-      email: 'carlos.luna@gmail.com',
-      procedencia: 'Navojoa, Son. MX',
-      modalidad: 'presencial'
-    }
+    
   ];
 
   const list = (alumnos.length ? alumnos : alumnosMock);
