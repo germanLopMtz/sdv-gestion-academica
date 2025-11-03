@@ -33,11 +33,24 @@ dist-ssr/
 # ----------------------------------
 # Visual Studio / .NET
 # ----------------------------------
+sdv-backend/bin/
+sdv-backend/obj/
+sdv-backend/.vs/
+sdv-backend/*.user
+sdv-backend/*.suo
+sdv-backend/*.csproj.user
+sdv-backend/*.dbmdl
+sdv-backend/*.pdb
+sdv-backend/*.cache
+sdv-backend/*.log
+sdv-backend/*.vsidx
+sdv-backend/*.dll
+sdv-backend/*.exe
 .vs/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Tt]emp/
+bin/
+obj/
+log/
+temp/
 *.cache
 *.pdb
 *.obj
