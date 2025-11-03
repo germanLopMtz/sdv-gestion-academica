@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
-import { alumnosApi, apiClient } from '@/services/api';
+import { alumnosApi } from '@/services/api';
 
 // Mapas para traducir enums del backend a etiquetas legibles
 const cursoTypeToLabel: Record<number, string> = {
@@ -94,7 +94,47 @@ const AlumnosSection = () => {
   const handleStudentSelect = (id: number, isSelected: boolean) => {
     if (isSelected) {
       setSelectedStudents(prev => [...prev, id]);
+<<<<<<< Updated upstream
+      if (selectedStudents.length === 0) {
+        // Si es el primer alumno seleccionado, cargar sus datos para edición
+        const baseList: any[] = (alumnos.length ? alumnos : alumnosMock);
+        const student = baseList.find(a => (a.id ?? a.Id) === id);
+        if (student) {
+          const cursoStr = student.curso ?? (student.TipoDeCurso === 2 ? 'Diplomado' : (student.TipoDeCurso === 1 ? 'Seminario' : ''));
+          const tipoCurso = cursoStr.includes('Diplomado') ? 'Diplomado' : 'Seminario';
+          const numeroDiplomado = cursoStr.includes('Diplomado') 
+            ? (cursoStr.split('N')[1] ?? '') 
+            : '';
+          
+          const fechaNacStr = student.fechaNac ?? student.FechaNacimiento ?? '';
+          let fechaNac = '';
+          if (typeof fechaNacStr === 'string' && fechaNacStr.includes('-') && fechaNacStr.length >= 8) {
+            const parts = fechaNacStr.includes('T') ? fechaNacStr.split('T')[0].split('-') : fechaNacStr.split('-');
+            if (parts.length === 3) {
+              const [y, m, d] = parts;
+              fechaNac = `${y}-${m}-${d}`;
+            }
+          }
+          const modalidadLabel = typeof student.Modalidad === 'number'
+            ? (modalidadToLabel[Number(student.Modalidad)] ?? 'presencial')
+            : (student.modalidad ?? 'presencial');
+          
+          setNewStudent({
+            nombre: student.nombre ?? student.NombreCompleto ?? '',
+            tipoCurso,
+            numeroDiplomado,
+            curso: cursoStr,
+            fechaNac: fechaNac,
+            telefono: student.telefono ?? student.Telefono ?? '',
+            email: student.email ?? student.CorreoElectronico ?? '',
+            procedencia: student.procedencia ?? student.Procedencia ?? '',
+            modalidad: modalidadLabel
+          });
+        }
+      }
+=======
       console.log('✅ Alumno seleccionado ID:', id);
+>>>>>>> Stashed changes
     } else {
       setSelectedStudents(prev => prev.filter(studentId => studentId !== id));
       console.log('❌ Alumno deseleccionado ID:', id);
@@ -111,6 +151,18 @@ const AlumnosSection = () => {
 
   const handleSubmit = async () => {
     if (isEditing && selectedStudents.length > 0) {
+<<<<<<< Updated upstream
+      // Mapear al DTO del backend
+      const [year, month, day] = newStudent.fechaNac.split('-');
+      const payload = {
+        NombreCompleto: newStudent.nombre,
+        FechaNacimiento: new Date(`${year}-${month}-${day}`).toISOString(),
+        Telefono: newStudent.telefono,
+        CorreoElectronico: newStudent.email,
+        Procedencia: newStudent.procedencia,
+        TipoDeCurso: newStudent.tipoCurso === 'Diplomado' ? 2 : 1,
+        Modalidad: newStudent.modalidad === 'virtual' ? 2 : 1,
+=======
       console.log('🔄 INICIANDO ACTUALIZACIÓN...');
       console.log('📝 Datos del formulario:', newStudent);
       
@@ -128,12 +180,18 @@ const AlumnosSection = () => {
           ? parseInt(newStudent.numeroDiplomado) 
           : null,
         curso: newStudent.curso
+>>>>>>> Stashed changes
       };
       
       console.log('📤 Datos a enviar al backend:', studentToUpdate);
       
       try {
         const id = selectedStudents[0];
+<<<<<<< Updated upstream
+        await alumnosApi.update(id, payload);
+        const res = await alumnosApi.getAll<any[]>();
+        setAlumnos(res.data);
+=======
         const updateRes = await alumnosApi.update(id, studentToUpdate);
         console.log('✅ Alumno actualizado exitosamente:', updateRes.data);
         
@@ -163,6 +221,8 @@ const AlumnosSection = () => {
           procedencia: '',
           modalidad: 'presencial'
         });
+        
+>>>>>>> Stashed changes
       } catch (e) {
         console.error('❌ Error al actualizar alumno:', e);
         alert('Error al actualizar el alumno. Por favor intenta de nuevo.');
@@ -229,6 +289,86 @@ const AlumnosSection = () => {
 
   const handleEdit = async () => {
     if (selectedStudents.length > 0) {
+<<<<<<< Updated upstream
+      const id = selectedStudents[0];
+      
+      // Buscar en la lista de alumnos del backend o en mock
+      const list = (alumnos.length ? alumnos : alumnosMock);
+      const student = list.find((a: any) => (a.id ?? a.Id) === id);
+      
+      if (student) {
+        // Obtener tipo de curso
+        const tipoDeCursoNum = Number(student.TipoDeCurso ?? student.tipoDeCurso ?? 0);
+        const esDiplomado = tipoDeCursoNum === 2;
+        const tipoCurso = esDiplomado ? 'Diplomado' : 'Seminario';
+        
+        // Obtener curso completo
+        const cursoStr = student.curso ?? (esDiplomado ? 'Diplomado' : 'Seminario');
+        const numeroDiplomado = esDiplomado && cursoStr.includes('N')
+          ? (cursoStr.match(/N(\d+)/)?.[1] ?? '')
+          : '';
+        
+        // Manejar fecha - convertir a formato YYYY-MM-DD para input date
+        let fechaNac = '';
+        const fechaRaw = student.fechaNac ?? student.FechaNacimiento ?? student.fechaNacimiento ?? '';
+        if (fechaRaw) {
+          try {
+            // Si es string ISO, parsearlo
+            if (typeof fechaRaw === 'string' && fechaRaw.includes('T')) {
+              const date = new Date(fechaRaw);
+              const yyyy = String(date.getFullYear());
+              const mm = String(date.getMonth() + 1).padStart(2, '0');
+              const dd = String(date.getDate()).padStart(2, '0');
+              fechaNac = `${yyyy}-${mm}-${dd}`;
+            } else if (typeof fechaRaw === 'string' && fechaRaw.includes('-')) {
+              // Si viene en formato DD-MM-YYYY o YYYY-MM-DD
+              const partes = fechaRaw.split('-');
+              if (partes.length === 3) {
+                // Detectar formato: si el primer elemento tiene 4 dígitos es YYYY-MM-DD
+                if (partes[0].length === 4) {
+                  fechaNac = fechaRaw.split('T')[0]; // Ya está en formato correcto
+                } else {
+                  // Es DD-MM-YYYY, convertir a YYYY-MM-DD
+                  const [dd, mm, yyyy] = partes;
+                  fechaNac = `${yyyy}-${mm}-${dd}`;
+                }
+              }
+            } else {
+              // Intentar parsear como fecha
+              const date = new Date(fechaRaw);
+              if (!isNaN(date.getTime())) {
+                const yyyy = String(date.getFullYear());
+                const mm = String(date.getMonth() + 1).padStart(2, '0');
+                const dd = String(date.getDate()).padStart(2, '0');
+                fechaNac = `${yyyy}-${mm}-${dd}`;
+              }
+            }
+          } catch {
+            fechaNac = '';
+          }
+        }
+        
+        // Obtener modalidad
+        const modalidadNum = Number(student.Modalidad ?? student.modalidad ?? 1);
+        const modalidadLabel = typeof student.Modalidad === 'number' || typeof student.modalidad === 'number'
+          ? (modalidadToLabel[modalidadNum] ?? 'presencial')
+          : (student.modalidad ?? 'presencial');
+        
+        setNewStudent({
+          nombre: student.nombre ?? student.NombreCompleto ?? '',
+          tipoCurso,
+          numeroDiplomado,
+          curso: cursoStr,
+          fechaNac: fechaNac,
+          telefono: student.telefono ?? student.Telefono ?? '',
+          email: student.email ?? student.CorreoElectronico ?? '',
+          procedencia: student.procedencia ?? student.Procedencia ?? '',
+          modalidad: modalidadLabel
+        });
+      }
+      setIsEditing(true);
+      setIsModalOpen(true);
+=======
       setIsLoadingEdit(true);
       
       const studentId = selectedStudents[0];
@@ -355,6 +495,7 @@ const AlumnosSection = () => {
       } finally {
         setIsLoadingEdit(false);
       }
+>>>>>>> Stashed changes
     }
   };
 
@@ -405,16 +546,19 @@ const AlumnosSection = () => {
     (async () => {
       try {
         const res = await alumnosApi.getAll<any[]>();
+        console.log('Datos del backend en useEffect:', res.data);
         
         // Solo actualizar si realmente hay datos del backend
         if (res.data && Array.isArray(res.data) && res.data.length > 0) {
           setAlumnos(res.data);
-          console.log('✅ Alumnos cargados desde backend:', res.data.length);
+          console.log('Alumnos cargados desde backend:', res.data.length);
         } else {
-          console.log('⚠️ Backend sin datos, usando datos mock');
+          console.log('Backend sin datos, usando datos mock');
+          // Si no hay datos del backend, los datos mock se mostrarán automáticamente
         }
       } catch (e) {
-        console.error('❌ ERROR al cargar alumnos, usando datos mock:', e);
+        console.error('Error al cargar alumnos, usando datos mock:', e);
+        // En caso de error, se mostrarán los datos mock automáticamente
       }
     })();
   }, []);
@@ -733,11 +877,7 @@ const AlumnosSection = () => {
     
   ];
 
-  // Solo usar datos del backend, nunca datos mock
-  const list = alumnos;
-  console.log('🎯 Lista a mostrar:', list);
-  console.log('🎯 Cantidad en lista:', list.length);
-  
+  const list = (alumnos.length ? alumnos : alumnosMock);
   const normalized = list.map((alumno: any) => {
     const id = alumno.id ?? alumno.Id ?? alumno.alumnoId ?? alumno.AlumnoId;
     const tipoDeCursoNum = Number(alumno.TipoDeCurso ?? alumno.tipoDeCurso ?? alumno.cursoTipo ?? alumno.curso_type);
