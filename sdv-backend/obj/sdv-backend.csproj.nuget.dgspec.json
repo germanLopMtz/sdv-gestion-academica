@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\marco\\OneDrive\\Documentos\\GitHub\\sdv-gestion-academica\\sdv-backend\\sdv-backend.csproj": {}
+    "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\sdv-backend.csproj": {}
   },
   "projects": {
-    "C:\\Users\\marco\\OneDrive\\Documentos\\GitHub\\sdv-gestion-academica\\sdv-backend\\sdv-backend.csproj": {
+    "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\sdv-backend.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\marco\\OneDrive\\Documentos\\GitHub\\sdv-gestion-academica\\sdv-backend\\sdv-backend.csproj",
+        "projectUniqueName": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\sdv-backend.csproj",
         "projectName": "sdv-backend",
-        "projectPath": "C:\\Users\\marco\\OneDrive\\Documentos\\GitHub\\sdv-gestion-academica\\sdv-backend\\sdv-backend.csproj",
-        "packagesPath": "C:\\Users\\marco\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\marco\\OneDrive\\Documentos\\GitHub\\sdv-gestion-academica\\sdv-backend\\obj\\",
+        "projectPath": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\sdv-backend.csproj",
+        "packagesPath": "C:\\Users\\lopez\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\lopez\\OneDrive\\Escritorio\\SEMESTRE 7\\Desarrollo de Software\\SDV\\sdv-gestion-academica\\sdv-backend\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\marco\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\lopez\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -44,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.300"
+        "SdkAnalysisLevel": "9.0.100"
       },
       "frameworks": {
         "net8.0": {
@@ -92,7 +92,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.102/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
