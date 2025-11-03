@@ -72,5 +72,32 @@ artifacts/
 # Rider / JetBrains
 *.sln.iml
 
+# ----------------------------------
+# Archivos temporales adicionales
+# ----------------------------------
+# Archivos de caché y configuración generados por Visual Studio
+*.dtbcache.v2
+*.suo
+*.DocumentLayout.json
+*.AssemblyInfo.cs
+*.nfolnputs.cache
+*.assets.cache
+*.Reference.cache
+project.assets.json
+project.nuget.cache
+*.nuget.props
+*.nuget.targets
+*.fig.editorconfig
+*.get.dgspec.json
+*.j.nuget.g.props
+
 # Otros
 _Dependencies/
+
+# ----------------------------------
+# Entornos y secretos
+# ----------------------------------
+.env
+appsettings.Development.json
+appsettings.Local.json
+launchSettings.json
