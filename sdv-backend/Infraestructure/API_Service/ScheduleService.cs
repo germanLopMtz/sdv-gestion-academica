@@ -273,13 +273,13 @@ namespace sdv_backend.Infraestructure.API_Services
                 throw new InvalidOperationException("El horario seleccionado no existe.");
 
             // Validar día de la semana
-            if (dto.DayOfWeek == Domain.Enum.DayOfWeek.None)
+            if (dto.DayOfWeek == Dias.None)
                 throw new InvalidOperationException("Debe seleccionar un día de la semana válido.");
 
             // Validar que no sea viernes o sábado con horario 8-10
             var timeSlot = _context.TimeSlots.FirstOrDefault(ts => ts.Id == dto.TimeSlotId);
             if (timeSlot != null && timeSlot.StartTime == "20:00" && 
-                (dto.DayOfWeek == Domain.Enum.DayOfWeek.Viernes || dto.DayOfWeek == Domain.Enum.DayOfWeek.Sabado))
+                (dto.DayOfWeek == Dias.Viernes || dto.DayOfWeek == Dias.Sabado))
             {
                 throw new InvalidOperationException("No se permiten clases de 8:00-10:00 PM los viernes y sábados.");
             }
@@ -293,16 +293,16 @@ namespace sdv_backend.Infraestructure.API_Services
                 throw new InvalidOperationException("Debe seleccionar un tipo de curso válido.");
         }
 
-        private string GetDayOfWeekDisplay(Domain.Enum.DayOfWeek day)
+        private string GetDayOfWeekDisplay(Dias day)
         {
             return day switch
             {
-                Domain.Enum.DayOfWeek.Lunes => "Lunes",
-                Domain.Enum.DayOfWeek.Martes => "Martes",
-                Domain.Enum.DayOfWeek.Miercoles => "Miércoles",
-                Domain.Enum.DayOfWeek.Jueves => "Jueves",
-                Domain.Enum.DayOfWeek.Viernes => "Viernes",
-                Domain.Enum.DayOfWeek.Sabado => "Sábado",
+                Dias.Lunes => "Lunes",
+                Dias.Martes => "Martes",
+                Dias.Miercoles => "Miércoles",
+                Dias.Jueves => "Jueves",
+                Dias.Viernes => "Viernes",
+                Dias.Sabado => "Sábado",
                 _ => "N/A"
             };
         }

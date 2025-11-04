@@ -11,7 +11,7 @@ namespace sdv_backend.Domain.OutPutDTO
         public string TimeSlotDisplay { get; set; } = string.Empty;
         public int MaestroId { get; set; }
         public string MaestroName { get; set; } = string.Empty;
-        public DayOfWeek DayOfWeek { get; set; }
+        public Dias DayOfWeek { get; set; }
         public string DayOfWeekDisplay { get; set; } = string.Empty;
         public ModalidadCurso Modalidad { get; set; }
         public string ModalidadDisplay { get; set; } = string.Empty;

@@ -1,3 +1,4 @@
+using sdv_backend.Data.Entities;
 using sdv_backend.Domain.DTOs;
 using sdv_backend.Domain.OutPutDTO;
 

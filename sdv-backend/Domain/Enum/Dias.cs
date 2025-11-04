@@ -1,6 +1,6 @@
 namespace sdv_backend.Domain.Enum
 {
-    public enum DayOfWeek
+    public enum Dias
     {
         None = 0,
         Lunes = 1,

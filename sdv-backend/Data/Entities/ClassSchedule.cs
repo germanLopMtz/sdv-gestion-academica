@@ -17,7 +17,7 @@ namespace sdv_backend.Data.Entities
         public Usuario Maestro { get; set; } = null!;
         
         // Datos de la clase
-        public DayOfWeek DayOfWeek { get; set; }
+        public Dias DayOfWeek { get; set; }
         public ModalidadCurso Modalidad { get; set; }
         public CursoType TipoDeCurso { get; set; }
         
