@@ -15,16 +15,51 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!usuario || !password) return;
+    if (!usuario || !password) {
+      alert('Por favor, ingrese su usuario y contraseña');
+      return;
+    }
+    
     try {
-      const res = await usuariosApi.login({ CorreoElectronico: usuario, Contrasena: password });
+      // Limpiar espacios en blanco del correo electrónico
+      const correoLimpiado = usuario.trim();
+      const res = await usuariosApi.login({ 
+        CorreoElectronico: correoLimpiado, 
+        Contrasena: password 
+      });
+      
       if (res.status >= 200 && res.status < 300) {
         onLogin();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error de login', error);
-      // Puedes reemplazar por un toast si lo prefieres
-      alert('Credenciales inválidas');
+      
+      // Mensaje más descriptivo basado en el tipo de error
+      let errorMessage = 'Error al iniciar sesión';
+      
+      if (error.response) {
+        // Error con respuesta del servidor
+        const status = error.response.status;
+        const message = error.response.data?.message || error.response.data?.error || error.response.data;
+        
+        if (status === 401 || status === 403) {
+          errorMessage = 'Credenciales inválidas. Verifique su correo electrónico y contraseña.';
+        } else if (status === 400) {
+          errorMessage = message || 'Datos de login inválidos. Por favor, verifique los campos.';
+        } else if (status === 500) {
+          errorMessage = message || 'Error del servidor. Por favor, intente más tarde.';
+        } else {
+          errorMessage = message || `Error ${status}: No se pudo completar la solicitud.`;
+        }
+      } else if (error.request) {
+        // Error de red - no se recibió respuesta
+        errorMessage = 'Error de conexión. Verifique que el servidor esté disponible.';
+      } else {
+        // Error en la configuración de la solicitud
+        errorMessage = 'Error al procesar la solicitud.';
+      }
+      
+      alert(errorMessage);
     }
   };
 

@@ -11,7 +11,8 @@ import {
   Bell, 
   LogOut,
   Menu,
-  X
+  X,
+  Calendar
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -29,6 +30,7 @@ const Navigation = ({ activeSection, setActiveSection, onLogout }: NavigationPro
     { id: 'mensualidades', label: 'Mensualidades', icon: CreditCard },
     { id: 'seminarios', label: 'Seminarios', icon: BookOpen },
     { id: 'diplomado', label: 'Diplomados', icon: GraduationCap },
+    { id: 'horarios', label: 'Horarios', icon: Calendar },
     { id: 'ver-perfil', label: 'Ver Perfil', icon: UserCircle },
     { id: 'asistencias', label: 'Asistencias', icon: CheckSquare },
     { id: 'lista-maestros', label: 'Lista de Maestros', icon: UserCheck },

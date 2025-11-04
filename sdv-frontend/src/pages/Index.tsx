@@ -5,6 +5,7 @@ import AlumnosSection from '@/components/AlumnosSection';
 import MensualidadesSection from '@/components/MensualidadesSection';
 import SeminariosSection from '@/components/SeminariosSection';
 import DiplomadosSection from '@/components/DiplomadosSection';
+import HorariosSection from '@/components/HorariosSection';
 import PerfilSection from '@/components/PerfilSection';
 import AsistenciasSection from '@/components/AsistenciasSection';
 import MaestrosSection from '@/components/MaestrosSection';
@@ -33,6 +34,8 @@ const Index = () => {
         return <SeminariosSection />;
       case 'diplomado':
         return <DiplomadosSection />;
+      case 'horarios':
+        return <HorariosSection />;
       case 'ver-perfil':
         return <PerfilSection />;
       case 'asistencias':

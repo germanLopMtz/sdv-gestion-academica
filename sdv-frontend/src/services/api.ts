@@ -64,5 +64,23 @@ export const alumnosApi = {
         apiClient.delete<T>(`/Alumnos/${id}`),
 };
 
+// Horarios
+export const horariosApi = {
+    create: <T = unknown>(data: unknown): Promise<AxiosResponse<T>> =>
+        apiClient.post<T>("/Schedule", data),
+    getAll: <T = unknown>(): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>("/Schedule"),
+    getById: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/Schedule/${id}`),
+    update: <T = unknown>(id: number, data: unknown): Promise<AxiosResponse<T>> =>
+        apiClient.put<T>(`/Schedule/${id}`, data),
+    remove: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
+        apiClient.delete<T>(`/Schedule/${id}`),
+    getRooms: <T = unknown>(): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>("/Schedule/rooms"),
+    getTimeSlots: <T = unknown>(): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>("/Schedule/timeslots"),
+};
+
 export type { AxiosResponse };
 

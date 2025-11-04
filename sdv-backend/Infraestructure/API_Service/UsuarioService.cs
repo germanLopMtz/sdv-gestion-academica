@@ -112,11 +112,17 @@ namespace sdv_backend.Infraestructure.API_Services
 
         public async Task<UsuarioOutPutDTO?> LoginAsync(LoginDTO dto)
         {
+            // Normalizar el correo electrónico (trim y lowercase)
+            var correoNormalizado = dto.CorreoElectronico?.Trim().ToLower() ?? string.Empty;
+            
+            // Buscar usuario por correo electrónico
             var usuario = await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.CorreoElectronico == dto.CorreoElectronico
-                                       && u.Contrasena == dto.Contrasena);
+                .FirstOrDefaultAsync(u => u.CorreoElectronico.ToLower() == correoNormalizado);
 
             if (usuario == null) return null;
+
+            // Comparar contraseña exacta (sin trim, case-sensitive)
+            if (usuario.Contrasena != dto.Contrasena) return null;
 
             return new UsuarioOutPutDTO
             {

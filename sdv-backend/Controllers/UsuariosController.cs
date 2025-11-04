@@ -7,13 +7,15 @@ namespace sdv_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsuariosController : Controller
+    public class UsuariosController : ControllerBase
     {
         private readonly IUsuarioService _usuarioService;
+        private readonly ILogger<UsuariosController> _logger;
 
-        public UsuariosController(IUsuarioService usuarioService)
+        public UsuariosController(IUsuarioService usuarioService, ILogger<UsuariosController> logger)
         {
             _usuarioService = usuarioService;
+            _logger = logger;
         }
 
         [HttpPost]
@@ -57,10 +59,28 @@ namespace sdv_backend.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO dto)
         {
-            var result = await _usuarioService.LoginAsync(dto);
-            if (result == null) return Unauthorized("Credenciales inválidas");
+            try
+            {
+                if (dto == null)
+                {
+                    return BadRequest("Los datos de login son requeridos");
+                }
 
-            return Ok(result);
+                if (string.IsNullOrEmpty(dto.CorreoElectronico) || string.IsNullOrEmpty(dto.Contrasena))
+                {
+                    return BadRequest("El correo electrónico y la contraseña son requeridos");
+                }
+
+                var result = await _usuarioService.LoginAsync(dto);
+                if (result == null) return Unauthorized("Credenciales inválidas");
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al procesar el login para el usuario: {CorreoElectronico}", dto?.CorreoElectronico);
+                return StatusCode(500, new { message = "Error interno del servidor", error = ex.Message });
+            }
         }
     }
 }
