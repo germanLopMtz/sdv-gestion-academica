@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,24 +11,62 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 
-interface Maestro {
-  id: number;
-  nombre: string;
-  curso: string;
-  fechaNac: string;
-  telefono: string;
-  email: string;
-  procedencia: string;
-  modalidad: string;
-}
+import { maestrosService } from '../services/maestrosService';
+import { MaestroOutPutDTO, Maestro, mapMaestroToDisplay, CursoType, ModalidadCurso, MaestroDTO } from '../types/maestro';
+
+// Funciones de mapeo para el formulario
+const getCursoDisplayName = (tipo: CursoType, numeroDiplomado?: number, especialidad?: string): string => {
+  switch (tipo) {
+    case CursoType.Seminario:
+      return 'Seminario de Actuación';
+    case CursoType.Diplomado:
+      return `Diplomado N${numeroDiplomado || ''} - ${especialidad || ''}`;
+    default:
+      return '';
+  }
+};
+
+const parseCursoFromDisplay = (displayName: string): { tipo: CursoType; numeroDiplomado?: number; especialidad?: string } => {
+  if (displayName === 'Seminario de Actuación') {
+    return { tipo: CursoType.Seminario };
+  }
+  
+  if (displayName.includes('Diplomado')) {
+    const match = displayName.match(/Diplomado N(\d+) - (.+)/);
+    if (match) {
+      return {
+        tipo: CursoType.Diplomado,
+        numeroDiplomado: parseInt(match[1]),
+        especialidad: match[2]
+      };
+    }
+  }
+  
+  return { tipo: CursoType.None };
+};
+
+const getModalidadFromString = (modalidad: string): ModalidadCurso => {
+  switch (modalidad) {
+    case 'presencial':
+      return ModalidadCurso.Presencial;
+    case 'virtual':
+      return ModalidadCurso.Virtual;
+    default:
+      return ModalidadCurso.None;
+  }
+};
+
+const getStringFromModalidad = (modalidad: ModalidadCurso): string => {
+  switch (modalidad) {
+    case ModalidadCurso.Presencial:
+      return 'presencial';
+    case ModalidadCurso.Virtual:
+      return 'virtual';
+    default:
+      return '';
+  }
+};
 
 interface NewMaestro {
   nombre: string;
@@ -38,6 +76,9 @@ interface NewMaestro {
   email: string;
   procedencia: string;
   modalidad: string;
+  direccion: string;
+  especialidad: string;
+  contrasena: string;
 }
 
 const MaestrosSection = () => {
@@ -60,91 +101,30 @@ const MaestrosSection = () => {
     telefono: '',
     email: '',
     procedencia: '',
-    modalidad: 'presencial'
+    modalidad: '',
+    direccion: '',
+    especialidad: '',
+    contrasena: ''
   });
 
-  const maestros: Maestro[] = [
-    {
-      id: 1,
-      nombre: 'Dir. Armando LeBlohic',
-      curso: 'Diplomado N5 - Doblaje',
-      fechaNac: '10-09-1975',
-      telefono: '52 6623456789',
-      email: 'armando.leblohic@sdv.edu.mx',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 2,
-      nombre: 'Mtra. María González',
-      curso: 'Diplomado N4 - Expresión Oral',
-      fechaNac: '22-06-1985',
-      telefono: '52 6622345678',
-      email: 'maria.gonzalez@sdv.edu.mx',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 3,
-      nombre: 'Mtra. Ana Martínez',
-      curso: 'Diplomado N6 - Locución',
-      fechaNac: '05-12-1982',
-      telefono: '52 6624567890',
-      email: 'ana.martinez@sdv.edu.mx',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 4,
-      nombre: 'Dr. Carlos Rodríguez',
-      curso: 'Seminario de Actuación',
-      fechaNac: '15-03-1980',
-      telefono: '52 6621234567',
-      email: 'carlos.rodriguez@sdv.edu.mx',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 5,
-      nombre: 'Mtra. Lizzy Hernández',
-      curso: 'Diplomado N4 - Expresión Oral',
-      fechaNac: '18-04-1988',
-      telefono: '52 6629876543',
-      email: 'lizzy.hernandez@sdv.edu.mx',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 6,
-      nombre: 'Mtro. Roberto Sánchez',
-      curso: 'Seminario de Actuación',
-      fechaNac: '30-07-1983',
-      telefono: '52 6628765432',
-      email: 'roberto.sanchez@sdv.edu.mx',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 7,
-      nombre: 'Mtra. Laura Torres',
-      curso: 'Diplomado N6 - Locución',
-      fechaNac: '12-11-1986',
-      telefono: '52 6627654321',
-      email: 'laura.torres@sdv.edu.mx',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
-    },
-    {
-      id: 8,
-      nombre: 'Mtro. Juan Pérez',
-      curso: 'Diplomado N5 - Doblaje',
-      fechaNac: '25-05-1981',
-      telefono: '52 6626543210',
-      email: 'juan.perez@sdv.edu.mx',
-      procedencia: 'Hermosillo, Son. MX',
-      modalidad: 'presencial'
+  const [maestros, setMaestros] = useState<Maestro[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadMaestros();
+  }, []);
+
+  const loadMaestros = async () => {
+    try {
+      const data: MaestroOutPutDTO[] = await maestrosService.getAll();
+      const displayMaestros = data.map(mapMaestroToDisplay);
+      setMaestros(displayMaestros);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading maestros:', error);
+      setLoading(false);
     }
-  ];
+  };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -226,7 +206,10 @@ const MaestrosSection = () => {
           telefono: maestroToEdit.telefono,
           email: maestroToEdit.email,
           procedencia: maestroToEdit.procedencia,
-          modalidad: maestroToEdit.modalidad
+          modalidad: maestroToEdit.modalidad,
+          direccion: '', // Estos campos no están en el objeto display, se dejarán vacíos para edición
+          especialidad: '',
+          contrasena: ''
         });
         setIsEditing(true);
         setIsModalOpen(true);
@@ -234,15 +217,77 @@ const MaestrosSection = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isEditing) {
-      // Aquí iría la lógica para actualizar el maestro existente
-      console.log('Maestro actualizado:', newMaestro);
-    } else {
-      // Aquí iría la lógica para agregar el nuevo maestro
-      console.log('Nuevo maestro:', newMaestro);
+    
+    // Validar que se hayan seleccionado curso y modalidad
+    if (!newMaestro.curso) {
+      alert('Por favor seleccione un curso');
+      return;
     }
+    
+    if (!newMaestro.modalidad) {
+      alert('Por favor seleccione una modalidad');
+      return;
+    }
+    
+    // Convertir datos del formulario al formato de API
+    const cursoInfo = parseCursoFromDisplay(newMaestro.curso);
+    
+    // Convertir fecha al formato ISO si es necesario
+    let fechaISO = newMaestro.fechaNac;
+    if (fechaISO && !fechaISO.includes('T')) {
+      // Si es una fecha en formato YYYY-MM-DD, convertir a ISO
+      fechaISO = new Date(fechaISO + 'T00:00:00.000Z').toISOString();
+    }
+    
+    const maestroData: MaestroDTO = {
+      nombreCompleto: newMaestro.nombre,
+      fechaNacimiento: fechaISO,
+      telefono: newMaestro.telefono,
+      correoElectronico: newMaestro.email,
+      procedencia: newMaestro.procedencia,
+      tipoDeCurso: cursoInfo.tipo,
+      modalidad: getModalidadFromString(newMaestro.modalidad),
+      numeroDiplomado: cursoInfo.numeroDiplomado,
+      especialidad: cursoInfo.especialidad || newMaestro.especialidad,
+      direccion: newMaestro.direccion,
+      contrasena: newMaestro.contrasena
+    };
+
+    console.log('📤 Datos que se envían al backend:', maestroData);
+    console.log('📤 Curso info parsed:', cursoInfo);
+
+    try {
+      if (isEditing && selectedMaestros.length > 0) {
+        // Actualizar maestro existente
+        const result = await maestrosService.update(selectedMaestros[0], maestroData);
+        console.log('✅ Maestro actualizado exitosamente:', result);
+      } else {
+        // Crear nuevo maestro
+        const result = await maestrosService.create(maestroData);
+        console.log('✅ Maestro creado exitosamente:', result);
+      }
+      
+      // Recargar la lista después de la operación
+      await loadMaestros();
+      
+    } catch (error: any) {
+      console.error('❌ Error al guardar maestro:', error);
+      
+      // Intentar obtener más detalles del error
+      if (error.response) {
+        console.error('❌ Response status:', error.response.status);
+        console.error('❌ Response data:', error.response.data);
+      } else if (error.message) {
+        console.error('❌ Error message:', error.message);
+      }
+      
+      // Mostrar error al usuario
+      alert(`Error al guardar maestro: ${error.message || 'Error desconocido'}`);
+    }
+
+    // Limpiar formulario y cerrar modal
     setIsModalOpen(false);
     setIsEditing(false);
     setNewMaestro({
@@ -252,7 +297,10 @@ const MaestrosSection = () => {
       telefono: '',
       email: '',
       procedencia: '',
-      modalidad: 'presencial'
+      modalidad: '',
+      direccion: '',
+      especialidad: '',
+      contrasena: ''
     });
   };
 
@@ -275,9 +323,23 @@ const MaestrosSection = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
-    // Aquí iría la lógica para eliminar los maestros seleccionados
-    console.log('Maestros a eliminar:', selectedMaestros);
+  const handleConfirmDelete = async () => {
+    try {
+      // Eliminar todos los maestros seleccionados
+      await Promise.all(
+        selectedMaestros.map(id => maestrosService.delete(id))
+      );
+      
+      console.log('Maestros eliminados exitosamente');
+      
+      // Recargar la lista después de eliminar
+      await loadMaestros();
+      
+    } catch (error) {
+      console.error('Error al eliminar maestros:', error);
+      // Aquí podrías mostrar un mensaje de error al usuario
+    }
+    
     setSelectedMaestros([]);
     setIsDeleteModalOpen(false);
   };
@@ -446,41 +508,55 @@ const MaestrosSection = () => {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
-                          {filteredMaestros.map((maestro) => (
-                            <tr key={maestro.id} className="hover:bg-blue-50/50 transition-colors">
-                              <td className="px-6 py-4">
-                                <input 
-                                  type="checkbox" 
-                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                  checked={selectedMaestros.includes(maestro.id)}
-                                  onChange={(e) => handleMaestroSelect(maestro.id, e.target.checked)}
-                                />
+                          {loading ? (
+                            <tr>
+                              <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
+                                Cargando maestros...
                               </td>
-                              <td className="px-6 py-4">
-                                <div className="flex items-center">
-                                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
-                                    <span className="text-sm font-medium text-blue-600">
-                                      {maestro.nombre.split(' ').map(n => n[0]).join('')}
-                                    </span>
-                                  </div>
-                                  <span className="text-sm font-medium text-gray-900">{maestro.nombre}</span>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <Badge 
-                                  variant="default"
-                                  className="px-3 py-1 rounded-full"
-                                >
-                                  {maestro.curso}
-                                </Badge>
-                              </td>
-                              <td className="px-6 py-4 text-sm text-gray-700">{maestro.fechaNac}</td>
-                              <td className="px-6 py-4 text-sm text-gray-700">{maestro.telefono}</td>
-                              <td className="px-6 py-4 text-sm text-gray-700">{maestro.email}</td>
-                              <td className="px-6 py-4 text-sm text-gray-700">{maestro.procedencia}</td>
-                              <td className="px-6 py-4 text-sm text-gray-700">{maestro.modalidad}</td>
                             </tr>
-                          ))}
+                          ) : filteredMaestros.length === 0 ? (
+                            <tr>
+                              <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
+                                No se encontraron maestros
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredMaestros.map((maestro) => (
+                              <tr key={maestro.id} className="hover:bg-blue-50/50 transition-colors">
+                                <td className="px-6 py-4">
+                                  <input 
+                                    type="checkbox" 
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    checked={selectedMaestros.includes(maestro.id)}
+                                    onChange={(e) => handleMaestroSelect(maestro.id, e.target.checked)}
+                                  />
+                                </td>
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center">
+                                    <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                                      <span className="text-sm font-medium text-blue-600">
+                                        {maestro.nombre.split(' ').map(n => n[0]).join('')}
+                                      </span>
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-900">{maestro.nombre}</span>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <Badge 
+                                    variant="default"
+                                    className="px-3 py-1 rounded-full"
+                                  >
+                                    {maestro.curso}
+                                  </Badge>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{maestro.fechaNac}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{maestro.telefono}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{maestro.email}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{maestro.procedencia}</td>
+                                <td className="px-6 py-4 text-sm text-gray-700">{maestro.modalidad}</td>
+                              </tr>
+                            ))
+                          )}
                         </tbody>
                       </table>
                     </div>
@@ -504,36 +580,34 @@ const MaestrosSection = () => {
           <div className="grid gap-6 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="curso">Curso</Label>
-                <Select
+                <Label htmlFor="curso-filter">Curso</Label>
+                <select
+                  id="curso-filter"
+                  name="curso"
                   value={filterValues.curso}
-                  onValueChange={(value) => handleFilterChange('curso', value)}
+                  onChange={(e) => handleFilterChange('curso', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione el curso" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Seminario de Actuación">Seminario de Actuación</SelectItem>
-                    <SelectItem value="Diplomado N4 - Expresión Oral">Diplomado N4 - Expresión Oral</SelectItem>
-                    <SelectItem value="Diplomado N5 - Doblaje">Diplomado N5 - Doblaje</SelectItem>
-                    <SelectItem value="Diplomado N6 - Locución">Diplomado N6 - Locución</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="">Seleccione el curso</option>
+                  <option value="Seminario de Actuación">Seminario de Actuación</option>
+                  <option value="Diplomado N4 - Expresión Oral">Diplomado N4 - Expresión Oral</option>
+                  <option value="Diplomado N5 - Doblaje">Diplomado N5 - Doblaje</option>
+                  <option value="Diplomado N6 - Locución">Diplomado N6 - Locución</option>
+                </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="modalidad">Modalidad</Label>
-                <Select
+                <Label htmlFor="modalidad-filter">Modalidad</Label>
+                <select
+                  id="modalidad-filter"
+                  name="modalidad"
                   value={filterValues.modalidad}
-                  onValueChange={(value) => handleFilterChange('modalidad', value)}
+                  onChange={(e) => handleFilterChange('modalidad', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione la modalidad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="presencial">Presencial</SelectItem>
-                    <SelectItem value="virtual">Virtual</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="">Seleccione la modalidad</option>
+                  <option value="presencial">Presencial</option>
+                  <option value="virtual">Virtual</option>
+                </select>
               </div>
             </div>
             <div className="space-y-2">
@@ -589,20 +663,20 @@ const MaestrosSection = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="curso">Curso</Label>
-                <Select
+                <select
+                  id="curso"
+                  name="curso"
                   value={newMaestro.curso}
-                  onValueChange={(value) => handleSelectChange('curso', value)}
+                  onChange={(e) => handleSelectChange('curso', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione el curso" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Seminario de Actuación">Seminario de Actuación</SelectItem>
-                    <SelectItem value="Diplomado N4 - Expresión Oral">Diplomado N4 - Expresión Oral</SelectItem>
-                    <SelectItem value="Diplomado N5 - Doblaje">Diplomado N5 - Doblaje</SelectItem>
-                    <SelectItem value="Diplomado N6 - Locución">Diplomado N6 - Locución</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="">Seleccione el curso</option>
+                  <option value="Seminario de Actuación">Seminario de Actuación</option>
+                  <option value="Diplomado N4 - Expresión Oral">Diplomado N4 - Expresión Oral</option>
+                  <option value="Diplomado N5 - Doblaje">Diplomado N5 - Doblaje</option>
+                  <option value="Diplomado N6 - Locución">Diplomado N6 - Locución</option>
+                </select>
               </div>
             </div>
 
@@ -658,19 +732,57 @@ const MaestrosSection = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="modalidad">Modalidad</Label>
-                <Select
+                <select
+                  id="modalidad"
+                  name="modalidad"
                   value={newMaestro.modalidad}
-                  onValueChange={(value) => handleSelectChange('modalidad', value)}
+                  onChange={(e) => handleSelectChange('modalidad', e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  required
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccione la modalidad" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="presencial">Presencial</SelectItem>
-                    <SelectItem value="virtual">Virtual</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <option value="">Seleccione la modalidad</option>
+                  <option value="presencial">Presencial</option>
+                  <option value="virtual">Virtual</option>
+                </select>
               </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="direccion">Dirección</Label>
+                <Input
+                  id="direccion"
+                  name="direccion"
+                  value={newMaestro.direccion}
+                  onChange={handleInputChange}
+                  placeholder="Ej: Calle 123, Col. Centro"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="especialidad">Especialidad</Label>
+                <Input
+                  id="especialidad"
+                  name="especialidad"
+                  value={newMaestro.especialidad}
+                  onChange={handleInputChange}
+                  placeholder="Ej: Doblaje, Locución, etc."
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="contrasena">Contraseña</Label>
+              <Input
+                id="contrasena"
+                name="contrasena"
+                type="password"
+                value={newMaestro.contrasena}
+                onChange={handleInputChange}
+                placeholder="Ingrese una contraseña"
+                required
+              />
             </div>
 
             <div className="flex justify-end space-x-2">

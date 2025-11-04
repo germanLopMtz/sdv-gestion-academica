@@ -19,6 +19,7 @@ builder.Services.AddDbContext<AppDBContext>(options =>
 
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAlumnoService, AlumnoService>();
+builder.Services.AddScoped<IMaestroService, MaestroService>(); // Nuevo servicio de maestros
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 
 // CORS para permitir el frontend (Vite y otros dev servers)

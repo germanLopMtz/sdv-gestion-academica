@@ -734,11 +734,11 @@ const AlumnosSection = () => {
   ];
 
   // Solo usar datos del backend, nunca datos mock
-  const list = alumnos;
+  const list = alumnos || [];
   console.log('🎯 Lista a mostrar:', list);
   console.log('🎯 Cantidad en lista:', list.length);
   
-  const normalized = list.map((alumno: any) => {
+  const normalized = Array.isArray(list) ? list.map((alumno: any) => {
     const id = alumno.id ?? alumno.Id ?? alumno.alumnoId ?? alumno.AlumnoId;
     const tipoDeCursoNum = Number(alumno.TipoDeCurso ?? alumno.tipoDeCurso ?? alumno.cursoTipo ?? alumno.curso_type);
     const modalidadNum = Number(alumno.Modalidad ?? alumno.modalidad);
@@ -764,7 +764,7 @@ const AlumnosSection = () => {
       ? (modalidadToLabel[modalidadNum] ?? String(alumno.modalidad))
       : (alumno.modalidad ?? (modalidadToLabel[modalidadNum] ?? ''));
     return { id, nombre, curso, fechaNac, telefono, email, procedencia, modalidad };
-  });
+  }) : [];
 
   const filteredAlumnos = normalized.filter(alumno => {
     const matchesSearch = searchTerm === '' || 
