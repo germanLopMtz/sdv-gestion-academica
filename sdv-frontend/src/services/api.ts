@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
 
-const rawBaseURL = ((import.meta as any).env?.VITE_API_URL as string | undefined) ?? "https://localhost:7248/api";
+const rawBaseURL = ((import.meta as any).env?.VITE_API_URL as string | undefined) ?? "/api";
 
 function normalizeBaseUrl(value: string): string {
     try {
