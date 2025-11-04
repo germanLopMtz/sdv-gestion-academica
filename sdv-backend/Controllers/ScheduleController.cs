@@ -101,6 +101,20 @@ namespace sdv_backend.Controllers
             var result = await _scheduleService.GetTimeSlotsAsync();
             return Ok(result);
         }
+
+        [HttpPost("seed")]
+        public async Task<IActionResult> SeedExamples()
+        {
+            try
+            {
+                await _scheduleService.SeedExamplesAsync();
+                return Ok(new { message = "Horarios de ejemplo creados (si no existían)" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error al crear ejemplos", error = ex.Message });
+            }
+        }
     }
 }
 

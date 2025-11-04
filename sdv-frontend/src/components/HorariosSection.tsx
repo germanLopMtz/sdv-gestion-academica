@@ -90,6 +90,15 @@ const HorariosSection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
+  // Filtros del listado
+  const [filters, setFilters] = useState({
+    tipo: 'all', // 'all' | '1' | '2'
+    dayOfWeek: 'all', // 'all' | '1'..'6'
+    timeSlotId: 'all', // 'all' | id
+    maestroId: 'all',
+    roomId: 'all',
+  });
+
   const [formData, setFormData] = useState({
     roomId: '',
     timeSlotId: '',
@@ -135,6 +144,31 @@ const HorariosSection = () => {
       setIsLoading(false);
     }
   };
+
+  const filteredSchedules = schedules.filter(s => {
+    if (filters.tipo !== 'all' && s.tipoDeCurso.toString() !== filters.tipo) return false;
+    if (filters.dayOfWeek !== 'all' && s.dayOfWeek.toString() !== filters.dayOfWeek) return false;
+    if (filters.timeSlotId !== 'all' && s.timeSlotId.toString() !== filters.timeSlotId) return false;
+    if (filters.maestroId !== 'all' && s.maestroId.toString() !== filters.maestroId) return false;
+    if (filters.roomId !== 'all' && s.roomId.toString() !== filters.roomId) return false;
+    return true;
+  });
+
+  // Cálculo de disponibles para día/horario seleccionados en filtros
+  const selectedDay = filters.dayOfWeek === 'all' ? null : parseInt(filters.dayOfWeek);
+  const selectedTimeSlotId = filters.timeSlotId === 'all' ? null : parseInt(filters.timeSlotId);
+  const occupiedMaestroIds = new Set(
+    schedules
+      .filter(s => (selectedDay ? s.dayOfWeek === selectedDay : false) && (selectedTimeSlotId ? s.timeSlotId === selectedTimeSlotId : false))
+      .map(s => s.maestroId)
+  );
+  const occupiedRoomIds = new Set(
+    schedules
+      .filter(s => (selectedDay ? s.dayOfWeek === selectedDay : false) && (selectedTimeSlotId ? s.timeSlotId === selectedTimeSlotId : false))
+      .map(s => s.roomId)
+  );
+  const availableMaestros = maestros.filter(m => !selectedDay || !selectedTimeSlotId || !occupiedMaestroIds.has(m.id));
+  const availableRooms = rooms.filter(r => !selectedDay || !selectedTimeSlotId || !occupiedRoomIds.has(r.id));
 
   const validateForm = (): string[] => {
     const errors: string[] = [];
@@ -331,6 +365,102 @@ const HorariosSection = () => {
         </Button>
       </div>
 
+      {/* Barra de filtros */}
+      <Card className="mb-4 border border-blue-200 bg-blue-50">
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+            <div>
+              <Label className="text-blue-700">Tipo</Label>
+              <Select value={filters.tipo} onValueChange={(v) => setFilters(prev => ({ ...prev, tipo: v }))}>
+                <SelectTrigger className="border-blue-300 focus:ring-blue-500 focus:border-blue-500"><SelectValue placeholder="Todos" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="1">Seminario</SelectItem>
+                  <SelectItem value="2">Diplomado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-blue-700">Día</Label>
+              <Select value={filters.dayOfWeek} onValueChange={(v) => setFilters(prev => ({ ...prev, dayOfWeek: v }))}>
+                <SelectTrigger className="border-blue-300 focus:ring-blue-500 focus:border-blue-500"><SelectValue placeholder="Todos" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {dayOfWeekOptions.map(d => (
+                    <SelectItem key={d.value} value={d.value.toString()}>{d.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-blue-700">Horario</Label>
+              <Select value={filters.timeSlotId} onValueChange={(v) => setFilters(prev => ({ ...prev, timeSlotId: v }))}>
+                <SelectTrigger className="border-blue-300 focus:ring-blue-500 focus:border-blue-500"><SelectValue placeholder="Todos" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {timeSlots.map(ts => (
+                    <SelectItem key={ts.id} value={ts.id.toString()}>{ts.displayName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-blue-700">Maestro</Label>
+              <Select value={filters.maestroId} onValueChange={(v) => setFilters(prev => ({ ...prev, maestroId: v }))}>
+                <SelectTrigger className="border-blue-300 focus:ring-blue-500 focus:border-blue-500"><SelectValue placeholder="Todos" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {maestros.map(m => (
+                    <SelectItem key={m.id} value={m.id.toString()}>{m.nombreCompleto}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label className="text-blue-700">Aula</Label>
+              <Select value={filters.roomId} onValueChange={(v) => setFilters(prev => ({ ...prev, roomId: v }))}>
+                <SelectTrigger className="border-blue-300 focus:ring-blue-500 focus:border-blue-500"><SelectValue placeholder="Todas" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todas</SelectItem>
+                  {rooms.map(r => (
+                    <SelectItem key={r.id} value={r.id.toString()}>{r.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2 items-center">
+            <Button
+              variant="outline"
+              className="border-blue-600 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
+              onClick={() => setFilters({ tipo: 'all', dayOfWeek: 'all', timeSlotId: 'all', maestroId: 'all', roomId: 'all' })}
+            >
+              Limpiar filtros
+            </Button>
+          </div>
+          {selectedDay && selectedTimeSlotId && (
+            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Card className="border border-blue-200">
+                <CardHeader><CardTitle className="text-base text-blue-700">Maestros disponibles</CardTitle></CardHeader>
+                <CardContent>
+                  {availableMaestros.length === 0 ? <p className="text-sm text-gray-500">Sin disponibilidad</p> : (
+                    <div className="flex flex-wrap gap-2">{availableMaestros.map(m => (<Badge key={m.id} variant="outline">{m.nombreCompleto}</Badge>))}</div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card className="border border-blue-200">
+                <CardHeader><CardTitle className="text-base text-blue-700">Aulas disponibles</CardTitle></CardHeader>
+                <CardContent>
+                  {availableRooms.length === 0 ? <p className="text-sm text-gray-500">Sin disponibilidad</p> : (
+                    <div className="flex flex-wrap gap-2">{availableRooms.map(r => (<Badge key={r.id} variant="outline">{r.name}</Badge>))}</div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {isLoading && schedules.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-gray-500">Cargando horarios...</p>
@@ -343,7 +473,7 @@ const HorariosSection = () => {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {schedules.map((schedule) => (
+          {filteredSchedules.map((schedule) => (
             <Card key={schedule.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
                 <div className="flex justify-between items-start">

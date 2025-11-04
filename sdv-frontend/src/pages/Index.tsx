@@ -3,8 +3,7 @@ import LoginScreen from '@/components/LoginScreen';
 import Navigation from '@/components/Navigation';
 import AlumnosSection from '@/components/AlumnosSection';
 import MensualidadesSection from '@/components/MensualidadesSection';
-import SeminariosSection from '@/components/SeminariosSection';
-import DiplomadosSection from '@/components/DiplomadosSection';
+// Eliminado: SeminariosSection y DiplomadosSection (ahora filtros en Horarios)
 import HorariosSection from '@/components/HorariosSection';
 import PerfilSection from '@/components/PerfilSection';
 import AsistenciasSection from '@/components/AsistenciasSection';
@@ -30,10 +29,7 @@ const Index = () => {
         return <AlumnosSection />;
       case 'mensualidades':
         return <MensualidadesSection />;
-      case 'seminarios':
-        return <SeminariosSection />;
-      case 'diplomado':
-        return <DiplomadosSection />;
+      // Eliminado: 'seminarios' y 'diplomado'
       case 'horarios':
         return <HorariosSection />;
       case 'ver-perfil':

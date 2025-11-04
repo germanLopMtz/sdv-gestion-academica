@@ -28,8 +28,7 @@ const Navigation = ({ activeSection, setActiveSection, onLogout }: NavigationPro
   const menuItems = [
     { id: 'alumnos', label: 'Alumnos', icon: Users },
     { id: 'mensualidades', label: 'Mensualidades', icon: CreditCard },
-    { id: 'seminarios', label: 'Seminarios', icon: BookOpen },
-    { id: 'diplomado', label: 'Diplomados', icon: GraduationCap },
+    // Eliminado: 'Seminarios' y 'Diplomados' (se gestionan como filtros en Horarios)
     { id: 'horarios', label: 'Horarios', icon: Calendar },
     { id: 'ver-perfil', label: 'Ver Perfil', icon: UserCircle },
     { id: 'asistencias', label: 'Asistencias', icon: CheckSquare },

@@ -13,6 +13,7 @@ namespace sdv_backend.Infraestructure.API_Service_Interfaces
         Task<bool> DeleteAsync(int id);
         Task<List<Room>> GetRoomsAsync();
         Task<List<TimeSlot>> GetTimeSlotsAsync();
+        Task SeedExamplesAsync();
     }
 }
 

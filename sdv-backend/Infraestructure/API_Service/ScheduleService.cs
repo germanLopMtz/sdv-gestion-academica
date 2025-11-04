@@ -230,6 +230,35 @@ namespace sdv_backend.Infraestructure.API_Services
             return await _context.TimeSlots.OrderBy(ts => ts.StartTime).ToListAsync();
         }
 
+        public async Task SeedExamplesAsync()
+        {
+            // No crear si ya hay horarios
+            if (await _context.ClassSchedules.AnyAsync()) return;
+
+            var rooms = await _context.Rooms.OrderBy(r => r.Id).ToListAsync();
+            var timeSlots = await _context.TimeSlots.OrderBy(ts => ts.Id).ToListAsync();
+            var maestro = await _context.Usuarios.Where(u => u.Tipo == UserType.Maestro).OrderBy(u => u.Id).FirstOrDefaultAsync();
+
+            if (!rooms.Any() || !timeSlots.Any() || maestro == null) return;
+
+            var examples = new List<ClassSchedule>
+            {
+                new ClassSchedule { RoomId = rooms[0].Id, TimeSlotId = timeSlots[0].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Lunes, Modalidad = ModalidadCurso.Presencial, TipoDeCurso = CursoType.Seminario, CreatedAt = DateTime.UtcNow },
+                new ClassSchedule { RoomId = rooms[Math.Min(1, rooms.Count-1)].Id, TimeSlotId = timeSlots[Math.Min(1, timeSlots.Count-1)].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Martes, Modalidad = ModalidadCurso.Presencial, TipoDeCurso = CursoType.Diplomado, CreatedAt = DateTime.UtcNow },
+                new ClassSchedule { RoomId = rooms[Math.Min(2, rooms.Count-1)].Id, TimeSlotId = timeSlots[Math.Min(0, timeSlots.Count-1)].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Jueves, Modalidad = ModalidadCurso.Virtual, TipoDeCurso = CursoType.Seminario, CreatedAt = DateTime.UtcNow },
+            };
+
+            foreach (var cs in examples)
+            {
+                // Respetar restricciones de viernes/sábado 20:00-22:00 ya no aplican aquí
+                // Evitar duplicados por índice único
+                var exists = await _context.ClassSchedules.AnyAsync(e => e.DayOfWeek == cs.DayOfWeek && e.TimeSlotId == cs.TimeSlotId && (e.RoomId == cs.RoomId || e.MaestroId == cs.MaestroId));
+                if (!exists) _context.ClassSchedules.Add(cs);
+            }
+
+            await _context.SaveChangesAsync();
+        }
+
         private ClassScheduleOutPutDTO MapToOutputDTO(ClassSchedule cs)
         {
             var maxCapacity = cs.TipoDeCurso == CursoType.Seminario ? 12 : 5;

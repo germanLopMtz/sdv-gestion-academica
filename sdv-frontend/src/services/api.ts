@@ -80,6 +80,8 @@ export const horariosApi = {
         apiClient.get<T>("/Schedule/rooms"),
     getTimeSlots: <T = unknown>(): Promise<AxiosResponse<T>> =>
         apiClient.get<T>("/Schedule/timeslots"),
+    seed: <T = unknown>(): Promise<AxiosResponse<T>> =>
+        apiClient.post<T>("/Schedule/seed", {}),
 };
 
 export type { AxiosResponse };
