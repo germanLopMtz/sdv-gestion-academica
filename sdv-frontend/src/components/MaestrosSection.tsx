@@ -350,8 +350,8 @@ const MaestrosSection = () => {
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-4 sm:space-y-0">
             <div className="text-center sm:text-left">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Lizzy Hernández</h2>
-              <p className="text-gray-600 mt-1">Coordinadora</p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800"></h2>
+              <p className="text-gray-600 mt-1">Administrador</p>
             </div>
             <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
               <div className="text-center sm:text-right">
