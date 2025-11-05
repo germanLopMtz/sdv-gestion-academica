@@ -25,6 +25,7 @@ export interface MaestroOutPutDTO {
   numeroDiplomado?: number;
   direccion: string;
   especialidad: string;
+  contrasena: string;
 }
 
 // Display interface for backward compatibility
@@ -121,7 +122,7 @@ export const mapMaestroToForm = (maestro: MaestroOutPutDTO): any => {
     modalidad: getModalidadDisplayForForm(maestro.modalidad),
     direccion: maestro.direccion || '',
     especialidad: maestro.especialidad || '',
-    contrasena: '' // No mostrar la contraseña por seguridad
+    contrasena: maestro.contrasena || '' // Incluir la contraseña del backend
   };
 };
 

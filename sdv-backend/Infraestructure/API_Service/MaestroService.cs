@@ -195,8 +195,9 @@ if (entity == null) return null;
  TipoDeCurso = usuario.TipoDeCurso ?? CursoType.None,
               Modalidad = usuario.Modalidad ?? ModalidadCurso.None,
          NumeroDiplomado = usuario.NumeroDiplomado,
-             Especialidad = usuario.Especialidad ?? string.Empty,
-     CreatedAt = usuario.CreatedAt
+        Contrasena = usuario.Contrasena, // Agregado para incluir contraseña
+      Especialidad = usuario.Especialidad ?? string.Empty,
+       CreatedAt = usuario.CreatedAt
             };
      }
     }
