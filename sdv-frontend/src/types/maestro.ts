@@ -75,6 +75,56 @@ export const mapMaestroToDisplay = (maestro: MaestroOutPutDTO): Maestro => {
   };
 };
 
+// Función para mapear datos originales al formulario de edición
+export const mapMaestroToForm = (maestro: MaestroOutPutDTO): any => {
+  const getCursoDisplayForForm = (tipo: CursoType, numeroDiplomado?: number): string => {
+    switch (tipo) {
+      case CursoType.Seminario:
+        return 'Seminario de Actuación';
+      case CursoType.Diplomado:
+        return `Diplomado N${numeroDiplomado || ''} - ${maestro.especialidad}`;
+      default:
+        return '';
+    }
+  };
+
+  const getModalidadDisplayForForm = (modalidad: ModalidadCurso): string => {
+    switch (modalidad) {
+      case ModalidadCurso.Presencial:
+        return 'presencial';
+      case ModalidadCurso.Virtual:
+        return 'virtual';
+      default:
+        return '';
+    }
+  };
+
+  // Convertir fecha ISO a formato de input date (YYYY-MM-DD)
+  let fechaFormateada = '';
+  if (maestro.fechaNacimiento) {
+    try {
+      const fecha = new Date(maestro.fechaNacimiento);
+      fechaFormateada = fecha.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error al formatear fecha:', error);
+      fechaFormateada = '';
+    }
+  }
+
+  return {
+    nombre: maestro.nombreCompleto || '',
+    curso: getCursoDisplayForForm(maestro.tipoDeCurso, maestro.numeroDiplomado),
+    fechaNac: fechaFormateada,
+    telefono: maestro.telefono || '',
+    email: maestro.correoElectronico || '',
+    procedencia: maestro.procedencia || '',
+    modalidad: getModalidadDisplayForForm(maestro.modalidad),
+    direccion: maestro.direccion || '',
+    especialidad: maestro.especialidad || '',
+    contrasena: '' // No mostrar la contraseña por seguridad
+  };
+};
+
 export enum CursoType {
   None = 0,
   Seminario = 1,

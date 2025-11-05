@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 
 import { maestrosService } from '../services/maestrosService';
-import { MaestroOutPutDTO, Maestro, mapMaestroToDisplay, CursoType, ModalidadCurso, MaestroDTO } from '../types/maestro';
+import { MaestroOutPutDTO, Maestro, mapMaestroToDisplay, mapMaestroToForm, CursoType, ModalidadCurso, MaestroDTO } from '../types/maestro';
 
 // Funciones de mapeo para el formulario
 const getCursoDisplayName = (tipo: CursoType, numeroDiplomado?: number, especialidad?: string): string => {
@@ -108,6 +108,7 @@ const MaestrosSection = () => {
   });
 
   const [maestros, setMaestros] = useState<Maestro[]>([]);
+  const [maestrosOriginales, setMaestrosOriginales] = useState<MaestroOutPutDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -117,6 +118,7 @@ const MaestrosSection = () => {
   const loadMaestros = async () => {
     try {
       const data: MaestroOutPutDTO[] = await maestrosService.getAll();
+      setMaestrosOriginales(data); // Guardar datos originales
       const displayMaestros = data.map(mapMaestroToDisplay);
       setMaestros(displayMaestros);
       setLoading(false);
@@ -197,22 +199,20 @@ const MaestrosSection = () => {
 
   const handleEditClick = () => {
     if (selectedMaestros.length === 1) {
-      const maestroToEdit = maestros.find(m => m.id === selectedMaestros[0]);
-      if (maestroToEdit) {
-        setNewMaestro({
-          nombre: maestroToEdit.nombre,
-          curso: maestroToEdit.curso,
-          fechaNac: maestroToEdit.fechaNac,
-          telefono: maestroToEdit.telefono,
-          email: maestroToEdit.email,
-          procedencia: maestroToEdit.procedencia,
-          modalidad: maestroToEdit.modalidad,
-          direccion: '', // Estos campos no están en el objeto display, se dejarán vacíos para edición
-          especialidad: '',
-          contrasena: ''
-        });
+      // Buscar el maestro en los datos originales del backend
+      const maestroOriginal = maestrosOriginales.find(m => m.id === selectedMaestros[0]);
+      if (maestroOriginal) {
+        console.log('🔧 Maestro original encontrado:', maestroOriginal);
+        
+        // Mapear los datos originales al formato del formulario
+        const datosFormulario = mapMaestroToForm(maestroOriginal);
+        console.log('📝 Datos para el formulario:', datosFormulario);
+        
+        setNewMaestro(datosFormulario);
         setIsEditing(true);
         setIsModalOpen(true);
+      } else {
+        console.error('❌ No se encontró el maestro original con ID:', selectedMaestros[0]);
       }
     }
   };
