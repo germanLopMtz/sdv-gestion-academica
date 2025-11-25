@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using sdv_backend.Data.Entities;
+using sdv_backend.Domain.Enum; 
 
 
 namespace sdv_backend.Data.DataDB
@@ -8,6 +9,7 @@ namespace sdv_backend.Data.DataDB
     {
         public AppDBContext(DbContextOptions<AppDBContext> options) : base(options)
         {
+            
         }
 
         public DbSet<Usuario> Usuarios => Set<Usuario>();
@@ -16,6 +18,8 @@ namespace sdv_backend.Data.DataDB
         public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
         public DbSet<ClassSchedule> ClassSchedules => Set<ClassSchedule>();
         public DbSet<ClassStudent> ClassStudents => Set<ClassStudent>();
+        public DbSet<Attendance> Attendances => Set<Attendance>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
