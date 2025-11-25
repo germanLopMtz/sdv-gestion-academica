@@ -16,6 +16,10 @@ namespace sdv_backend.Data.DataDB
         public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
         public DbSet<ClassSchedule> ClassSchedules => Set<ClassSchedule>();
         public DbSet<ClassStudent> ClassStudents => Set<ClassStudent>();
+    
+        // Nuevas entidades para Avisos
+        public DbSet<Aviso> Avisos => Set<Aviso>();
+        public DbSet<AvisoDestinatario> AvisoDestinatarios => Set<AvisoDestinatario>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,13 +56,37 @@ namespace sdv_backend.Data.DataDB
                 .HasForeignKey(cs => cs.AlumnoId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Índice único para prevenir choques de maestro/aula en mismo horario y día
+            // Configuración de relaciones para Avisos
+            modelBuilder.Entity<Aviso>()
+                .HasOne(a => a.UsuarioCreador)
+                .WithMany()
+                .HasForeignKey(a => a.UsuarioCreadorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<AvisoDestinatario>()
+                .HasOne(ad => ad.Aviso)
+                .WithMany(a => a.Destinatarios)
+                .HasForeignKey(ad => ad.AvisoId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<AvisoDestinatario>()
+                .HasOne(ad => ad.Maestro)
+                .WithMany()
+                .HasForeignKey(ad => ad.MaestroId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Índices únicos existentes
             modelBuilder.Entity<ClassSchedule>()
                 .HasIndex(cs => new { cs.MaestroId, cs.DayOfWeek, cs.TimeSlotId })
                 .IsUnique();
 
             modelBuilder.Entity<ClassSchedule>()
                 .HasIndex(cs => new { cs.RoomId, cs.DayOfWeek, cs.TimeSlotId })
+                .IsUnique();
+
+            // Índice único para evitar destinatarios duplicados
+            modelBuilder.Entity<AvisoDestinatario>()
+                .HasIndex(ad => new { ad.AvisoId, ad.MaestroId })
                 .IsUnique();
         }
     }

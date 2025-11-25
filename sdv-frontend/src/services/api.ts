@@ -84,5 +84,33 @@ export const horariosApi = {
         apiClient.post<T>("/Schedule/seed", {}),
 };
 
+// Avisos
+export const avisosApi = {
+    create: <T = unknown>(data: unknown, usuarioCreadorId: number): Promise<AxiosResponse<T>> =>
+        apiClient.post<T>("/avisos", data, {
+            params: { usuarioCreadorId }
+        }),
+    getAll: <T = unknown>(): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>("/avisos"),
+    getById: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/avisos/${id}`),
+    update: <T = unknown>(id: number, data: unknown): Promise<AxiosResponse<T>> =>
+        apiClient.put<T>(`/avisos/${id}`, data),
+    remove: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
+        apiClient.delete<T>(`/avisos/${id}`),
+    getByEstado: <T = unknown>(estado: string): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/avisos/estado/${estado}`),
+    getByMaestro: <T = unknown>(maestroId: number): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/avisos/maestro/${maestroId}`),
+    enviar: <T = unknown>(id: number, usuarioId: number): Promise<AxiosResponse<T>> =>
+        apiClient.post<T>(`/avisos/${id}/enviar`, {}, { params: { usuarioId } }),
+    cancelar: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
+        apiClient.post<T>(`/avisos/${id}/cancelar`, {}),
+    marcarLeido: <T = unknown>(avisoId: number, maestroId: number): Promise<AxiosResponse<T>> =>
+        apiClient.post<T>(`/avisos/${avisoId}/marcar-leido/${maestroId}`, {}),
+    buscar: <T = unknown>(searchTerm: string): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/avisos/buscar?searchTerm=${encodeURIComponent(searchTerm)}`),
+};
+
 export type { AxiosResponse };
 

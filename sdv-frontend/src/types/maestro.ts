@@ -64,11 +64,24 @@ export const mapMaestroToDisplay = (maestro: MaestroOutPutDTO): Maestro => {
     }
   };
 
+  // Formatear fecha de ISO a formato legible (DD/MM/YYYY)
+  const formatearFecha = (fechaISO: string): string => {
+    try {
+      const fecha = new Date(fechaISO);
+      const dia = fecha.getDate().toString().padStart(2, '0');
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const anio = fecha.getFullYear();
+      return `${dia}/${mes}/${anio}`;
+    } catch (error) {
+      return fechaISO; // Si hay error, devolver fecha original
+    }
+  };
+
   return {
     id: maestro.id,
     nombre: maestro.nombreCompleto,
     curso: getCursoName(maestro.tipoDeCurso, maestro.numeroDiplomado),
-    fechaNac: maestro.fechaNacimiento,
+    fechaNac: formatearFecha(maestro.fechaNacimiento),
     telefono: maestro.telefono,
     email: maestro.correoElectronico,
     procedencia: maestro.procedencia,
