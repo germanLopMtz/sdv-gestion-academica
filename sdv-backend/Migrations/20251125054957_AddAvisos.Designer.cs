@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using sdv_backend.Data.DataDB;
 
@@ -11,9 +12,11 @@ using sdv_backend.Data.DataDB;
 namespace sdv_backend.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20251125054957_AddAvisos")]
+    partial class AddAvisos
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -196,55 +199,6 @@ namespace sdv_backend.Migrations
                     b.ToTable("ClassStudents");
                 });
 
-            modelBuilder.Entity("sdv_backend.Data.Entities.Mensualidad", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AlumnoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Año")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Concepto")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Estado")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("FechaActualizacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FechaPago")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Mes")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MetodoPago")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Monto")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Observaciones")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AlumnoId", "Mes", "Año", "Concepto")
-                        .IsUnique();
-
-                    b.ToTable("Mensualidades");
-                });
-
             modelBuilder.Entity("sdv_backend.Data.Entities.Room", b =>
                 {
                     b.Property<int>("Id")
@@ -418,17 +372,6 @@ namespace sdv_backend.Migrations
                     b.Navigation("Alumno");
 
                     b.Navigation("ClassSchedule");
-                });
-
-            modelBuilder.Entity("sdv_backend.Data.Entities.Mensualidad", b =>
-                {
-                    b.HasOne("sdv_backend.Data.Entities.Alumno", "Alumno")
-                        .WithMany()
-                        .HasForeignKey("AlumnoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Alumno");
                 });
 
             modelBuilder.Entity("sdv_backend.Data.Entities.Aviso", b =>

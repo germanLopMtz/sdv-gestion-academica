@@ -25,6 +25,7 @@ export interface MaestroOutPutDTO {
   numeroDiplomado?: number;
   direccion: string;
   especialidad: string;
+  contrasena: string;
 }
 
 // Display interface for backward compatibility
@@ -63,15 +64,78 @@ export const mapMaestroToDisplay = (maestro: MaestroOutPutDTO): Maestro => {
     }
   };
 
+  // Formatear fecha de ISO a formato legible (DD/MM/YYYY)
+  const formatearFecha = (fechaISO: string): string => {
+    try {
+      const fecha = new Date(fechaISO);
+      const dia = fecha.getDate().toString().padStart(2, '0');
+      const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const anio = fecha.getFullYear();
+      return `${dia}/${mes}/${anio}`;
+    } catch (error) {
+      return fechaISO; // Si hay error, devolver fecha original
+    }
+  };
+
   return {
     id: maestro.id,
     nombre: maestro.nombreCompleto,
     curso: getCursoName(maestro.tipoDeCurso, maestro.numeroDiplomado),
-    fechaNac: maestro.fechaNacimiento,
+    fechaNac: formatearFecha(maestro.fechaNacimiento),
     telefono: maestro.telefono,
     email: maestro.correoElectronico,
     procedencia: maestro.procedencia,
     modalidad: getModalidadName(maestro.modalidad)
+  };
+};
+
+// Función para mapear datos originales al formulario de edición
+export const mapMaestroToForm = (maestro: MaestroOutPutDTO): any => {
+  const getCursoDisplayForForm = (tipo: CursoType, numeroDiplomado?: number): string => {
+    switch (tipo) {
+      case CursoType.Seminario:
+        return 'Seminario de Actuación';
+      case CursoType.Diplomado:
+        return `Diplomado N${numeroDiplomado || ''} - ${maestro.especialidad}`;
+      default:
+        return '';
+    }
+  };
+
+  const getModalidadDisplayForForm = (modalidad: ModalidadCurso): string => {
+    switch (modalidad) {
+      case ModalidadCurso.Presencial:
+        return 'presencial';
+      case ModalidadCurso.Virtual:
+        return 'virtual';
+      default:
+        return '';
+    }
+  };
+
+  // Convertir fecha ISO a formato de input date (YYYY-MM-DD)
+  let fechaFormateada = '';
+  if (maestro.fechaNacimiento) {
+    try {
+      const fecha = new Date(maestro.fechaNacimiento);
+      fechaFormateada = fecha.toISOString().split('T')[0];
+    } catch (error) {
+      console.error('Error al formatear fecha:', error);
+      fechaFormateada = '';
+    }
+  }
+
+  return {
+    nombre: maestro.nombreCompleto || '',
+    curso: getCursoDisplayForForm(maestro.tipoDeCurso, maestro.numeroDiplomado),
+    fechaNac: fechaFormateada,
+    telefono: maestro.telefono || '',
+    email: maestro.correoElectronico || '',
+    procedencia: maestro.procedencia || '',
+    modalidad: getModalidadDisplayForForm(maestro.modalidad),
+    direccion: maestro.direccion || '',
+    especialidad: maestro.especialidad || '',
+    contrasena: maestro.contrasena || '' // Incluir la contraseña del backend
   };
 };
 
