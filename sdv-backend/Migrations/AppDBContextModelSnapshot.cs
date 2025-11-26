@@ -63,71 +63,6 @@ namespace sdv_backend.Migrations
                     b.ToTable("Alumnos");
                 });
 
-            modelBuilder.Entity("sdv_backend.Data.Entities.Aviso", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Estado")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaEnvio")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Mensaje")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UsuarioCreadorId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioCreadorId");
-
-                    b.ToTable("Avisos");
-                });
-
-            modelBuilder.Entity("sdv_backend.Data.Entities.AvisoDestinatario", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AvisoId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("FechaLectura")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("Leido")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("MaestroId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MaestroId");
-
-                    b.HasIndex("AvisoId", "MaestroId")
-                        .IsUnique();
-
-                    b.ToTable("AvisoDestinatarios");
-                });
-
             modelBuilder.Entity("sdv_backend.Data.Entities.ClassSchedule", b =>
                 {
                     b.Property<int>("Id")
@@ -194,55 +129,6 @@ namespace sdv_backend.Migrations
                     b.HasIndex("ClassScheduleId");
 
                     b.ToTable("ClassStudents");
-                });
-
-            modelBuilder.Entity("sdv_backend.Data.Entities.Mensualidad", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AlumnoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Año")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Concepto")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Estado")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("FechaActualizacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("FechaPago")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Mes")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MetodoPago")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Monto")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Observaciones")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AlumnoId", "Mes", "Año", "Concepto")
-                        .IsUnique();
-
-                    b.ToTable("Mensualidades");
                 });
 
             modelBuilder.Entity("sdv_backend.Data.Entities.Room", b =>
@@ -344,36 +230,6 @@ namespace sdv_backend.Migrations
                     b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("sdv_backend.Data.Entities.Aviso", b =>
-                {
-                    b.HasOne("sdv_backend.Data.Entities.Usuario", "UsuarioCreador")
-                        .WithMany()
-                        .HasForeignKey("UsuarioCreadorId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("UsuarioCreador");
-                });
-
-            modelBuilder.Entity("sdv_backend.Data.Entities.AvisoDestinatario", b =>
-                {
-                    b.HasOne("sdv_backend.Data.Entities.Aviso", "Aviso")
-                        .WithMany("Destinatarios")
-                        .HasForeignKey("AvisoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("sdv_backend.Data.Entities.Usuario", "Maestro")
-                        .WithMany()
-                        .HasForeignKey("MaestroId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Aviso");
-
-                    b.Navigation("Maestro");
-                });
-
             modelBuilder.Entity("sdv_backend.Data.Entities.ClassSchedule", b =>
                 {
                     b.HasOne("sdv_backend.Data.Entities.Usuario", "Maestro")
@@ -418,22 +274,6 @@ namespace sdv_backend.Migrations
                     b.Navigation("Alumno");
 
                     b.Navigation("ClassSchedule");
-                });
-
-            modelBuilder.Entity("sdv_backend.Data.Entities.Mensualidad", b =>
-                {
-                    b.HasOne("sdv_backend.Data.Entities.Alumno", "Alumno")
-                        .WithMany()
-                        .HasForeignKey("AlumnoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Alumno");
-                });
-
-            modelBuilder.Entity("sdv_backend.Data.Entities.Aviso", b =>
-                {
-                    b.Navigation("Destinatarios");
                 });
 
             modelBuilder.Entity("sdv_backend.Data.Entities.ClassSchedule", b =>

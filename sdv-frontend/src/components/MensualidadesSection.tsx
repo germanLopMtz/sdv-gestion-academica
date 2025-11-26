@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,8 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X } from 'lucide-react';
 import { Calendar, Users, MapPin, Clock } from 'lucide-react';
-import { mensualidadesApi, type MensualidadResumenDTO, type MensualidadDTO } from '@/services/mensualidadesService';
-import { alumnosApi } from '@/services/api';
 
 const MensualidadesSection = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,61 +33,861 @@ const MensualidadesSection = () => {
     mes: ''
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedMensualidad, setSelectedMensualidad] = useState<any>(null);
+  const [selectedMensualidad, setSelectedMensualidad] = useState(null);
   const [fecha, setFecha] = useState('');
-  const [mensualidades, setMensualidades] = useState<MensualidadResumenDTO[]>([]);
-  const [alumnos, setAlumnos] = useState<Array<{ id: number; nombre: string }>>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [currentMensualidadId, setCurrentMensualidadId] = useState<number | null>(null);
   
-  // Mapeo de meses
-  const meses = ['AGO', 'SEP', 'OCT', 'NOV', 'DIC', 'ENE', 'FEB'];
-  const mesToNumber: Record<string, number> = {
-    'AGO': 1, 'SEP': 2, 'OCT': 3, 'NOV': 4, 'DIC': 5, 'ENE': 6, 'FEB': 7
-  };
-  const numberToMes: Record<number, string> = {
-    1: 'AGO', 2: 'SEP', 3: 'OCT', 4: 'NOV', 5: 'DIC', 6: 'ENE', 7: 'FEB'
-  };
-
-  // Cargar datos al montar el componente
-  useEffect(() => {
-    const currentDate = new Date();
-    const formattedDate = currentDate.toLocaleDateString('es-MX', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      year: 'numeric' 
-    });
-    setFecha(formattedDate);
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const añoActual = new Date().getFullYear();
-      
-      // Cargar resumen de mensualidades
-      const resumenResponse = await mensualidadesApi.getResumen(añoActual);
-      setMensualidades(resumenResponse.data);
-
-      // Cargar alumnos para el selector
-      const alumnosResponse = await alumnosApi.getAll();
-      const alumnosData = (alumnosResponse.data as any[]).map((alumno: any) => ({
-        id: alumno.id,
-        nombre: alumno.nombreCompleto
-      }));
-      setAlumnos(alumnosData);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Error al cargar los datos');
-      console.error('Error loading data:', err);
-    } finally {
-      setLoading(false);
+  const mensualidades = [
+    {
+      id: 1,
+      nombre: 'Sarah Alicia Gutiérrez Hernández',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 1',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 1, nombre: 'Inscripción', estado: 'S' },
+        { id: 2, nombre: 'Mensualidad', estado: 'S' },
+        { id: 3, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 2,
+      nombre: 'Ian Karim Villalba Romero',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$1000',
+      aula: 'Aula 2',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 4, nombre: 'Inscripción', estado: 'S' },
+        { id: 5, nombre: 'Mensualidad', estado: 'S' },
+        { id: 6, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 3,
+      nombre: 'Cristian Jair Alcantar Cienfuegos',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 3',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 7, nombre: 'Inscripción', estado: 'N' },
+        { id: 8, nombre: 'Mensualidad', estado: 'N' },
+        { id: 9, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 4,
+      nombre: 'Emmanuel Mizques Martínez',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: null,
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 4',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 10, nombre: 'Inscripción', estado: 'N' },
+        { id: 11, nombre: 'Mensualidad', estado: 'N' },
+        { id: 12, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 5,
+      nombre: 'Aaron Jesús Ramos García',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 5',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 13, nombre: 'Inscripción', estado: 'S' },
+        { id: 14, nombre: 'Mensualidad', estado: 'S' },
+        { id: 15, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 6,
+      nombre: 'María Fernanda López Torres',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 6',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 16, nombre: 'Inscripción', estado: 'N' },
+        { id: 17, nombre: 'Mensualidad', estado: 'N' },
+        { id: 18, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 7,
+      nombre: 'Carlos Eduardo Mendoza Ruiz',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$1000',
+      aula: 'Aula 7',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 19, nombre: 'Inscripción', estado: 'S' },
+        { id: 20, nombre: 'Mensualidad', estado: 'S' },
+        { id: 21, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 8,
+      nombre: 'Ana Sofía Valenzuela Díaz',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 8',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 22, nombre: 'Inscripción', estado: 'S' },
+        { id: 23, nombre: 'Mensualidad', estado: 'S' },
+        { id: 24, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 9,
+      nombre: 'Diego Alejandro Soto Vega',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 9',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 25, nombre: 'Inscripción', estado: 'N' },
+        { id: 26, nombre: 'Mensualidad', estado: 'N' },
+        { id: 27, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 10,
+      nombre: 'Valeria Guadalupe Morales',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 10',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 28, nombre: 'Inscripción', estado: 'S' },
+        { id: 29, nombre: 'Mensualidad', estado: 'S' },
+        { id: 30, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 11,
+      nombre: 'José Manuel Ríos Ortega',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 11',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 31, nombre: 'Inscripción', estado: 'S' },
+        { id: 32, nombre: 'Mensualidad', estado: 'S' },
+        { id: 33, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 12,
+      nombre: 'Laura Patricia Castro Luna',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 12',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 34, nombre: 'Inscripción', estado: 'N' },
+        { id: 35, nombre: 'Mensualidad', estado: 'N' },
+        { id: 36, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 13,
+      nombre: 'Roberto Carlos Navarro',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 13',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 37, nombre: 'Inscripción', estado: 'S' },
+        { id: 38, nombre: 'Mensualidad', estado: 'S' },
+        { id: 39, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 14,
+      nombre: 'Gabriela Alejandra Torres',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$1000',
+      aula: 'Aula 14',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 40, nombre: 'Inscripción', estado: 'S' },
+        { id: 41, nombre: 'Mensualidad', estado: 'S' },
+        { id: 42, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 15,
+      nombre: 'Miguel Ángel Flores',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 15',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 43, nombre: 'Inscripción', estado: 'N' },
+        { id: 44, nombre: 'Mensualidad', estado: 'N' },
+        { id: 45, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 16,
+      nombre: 'Isabella Martínez Ríos',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 16',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 46, nombre: 'Inscripción', estado: 'S' },
+        { id: 47, nombre: 'Mensualidad', estado: 'S' },
+        { id: 48, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 17,
+      nombre: 'Fernando Daniel Herrera',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$1000',
+      aula: 'Aula 17',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 49, nombre: 'Inscripción', estado: 'S' },
+        { id: 50, nombre: 'Mensualidad', estado: 'S' },
+        { id: 51, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 18,
+      nombre: 'Camila Sofía Ramírez',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 18',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 52, nombre: 'Inscripción', estado: 'N' },
+        { id: 53, nombre: 'Mensualidad', estado: 'N' },
+        { id: 54, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 19,
+      nombre: 'Juan Pablo Sánchez',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$1000',
+      aula: 'Aula 19',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 55, nombre: 'Inscripción', estado: 'S' },
+        { id: 56, nombre: 'Mensualidad', estado: 'S' },
+        { id: 57, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 20,
+      nombre: 'Daniela Alejandra Luna',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 20',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 58, nombre: 'Inscripción', estado: 'S' },
+        { id: 59, nombre: 'Mensualidad', estado: 'S' },
+        { id: 60, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 21,
+      nombre: 'Luis Enrique Vega',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 21',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 61, nombre: 'Inscripción', estado: 'N' },
+        { id: 62, nombre: 'Mensualidad', estado: 'N' },
+        { id: 63, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 22,
+      nombre: 'Mariana Guadalupe Ortega',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$1000',
+      aula: 'Aula 22',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 64, nombre: 'Inscripción', estado: 'S' },
+        { id: 65, nombre: 'Mensualidad', estado: 'S' },
+        { id: 66, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 23,
+      nombre: 'Ricardo Antonio Díaz',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 23',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 67, nombre: 'Inscripción', estado: 'S' },
+        { id: 68, nombre: 'Mensualidad', estado: 'S' },
+        { id: 69, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 24,
+      nombre: 'Sofía Valentina Ruiz',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 24',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 70, nombre: 'Inscripción', estado: 'N' },
+        { id: 71, nombre: 'Mensualidad', estado: 'N' },
+        { id: 72, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 25,
+      nombre: 'Alejandro José Torres',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 25',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 73, nombre: 'Inscripción', estado: 'S' },
+        { id: 74, nombre: 'Mensualidad', estado: 'S' },
+        { id: 75, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 26,
+      nombre: 'Valentina Isabella Morales',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 26',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 76, nombre: 'Inscripción', estado: 'N' },
+        { id: 77, nombre: 'Mensualidad', estado: 'N' },
+        { id: 78, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 27,
+      nombre: 'Emilio José Ríos',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$1000',
+      aula: 'Aula 27',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 79, nombre: 'Inscripción', estado: 'S' },
+        { id: 80, nombre: 'Mensualidad', estado: 'S' },
+        { id: 81, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 28,
+      nombre: 'Renata Sofía Castro',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 28',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 82, nombre: 'Inscripción', estado: 'S' },
+        { id: 83, nombre: 'Mensualidad', estado: 'S' },
+        { id: 84, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 29,
+      nombre: 'Sebastián Alejandro Navarro',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 29',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 85, nombre: 'Inscripción', estado: 'N' },
+        { id: 86, nombre: 'Mensualidad', estado: 'N' },
+        { id: 87, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 30,
+      nombre: 'Regina María Flores',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 30',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 88, nombre: 'Inscripción', estado: 'S' },
+        { id: 89, nombre: 'Mensualidad', estado: 'S' },
+        { id: 90, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 31,
+      nombre: 'Adrián José Martínez',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 31',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 91, nombre: 'Inscripción', estado: 'N' },
+        { id: 92, nombre: 'Mensualidad', estado: 'N' },
+        { id: 93, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 32,
+      nombre: 'Natalia Guadalupe Herrera',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$1000',
+      aula: 'Aula 32',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 94, nombre: 'Inscripción', estado: 'S' },
+        { id: 95, nombre: 'Mensualidad', estado: 'S' },
+        { id: 96, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 33,
+      nombre: 'Diego Antonio Ramírez',
+      curso: 'Diplomado N6',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 33',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 97, nombre: 'Inscripción', estado: 'S' },
+        { id: 98, nombre: 'Mensualidad', estado: 'S' },
+        { id: 99, nombre: 'Material', estado: 'S' }
+      ]
+    },
+    {
+      id: 34,
+      nombre: 'María José Sánchez',
+      curso: 'Seminario',
+      mensualidad: '$1000',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PENDIENTE',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$0',
+      aula: 'Aula 34',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 100, nombre: 'Inscripción', estado: 'N' },
+        { id: 101, nombre: 'Mensualidad', estado: 'N' },
+        { id: 102, nombre: 'Material', estado: 'N' }
+      ]
+    },
+    {
+      id: 35,
+      nombre: 'Carlos Eduardo Luna',
+      curso: 'Diplomado N5',
+      mensualidad: '$900',
+      pagos: {
+        AGO: 'PAGADO',
+        SEP: 'PAGADO', 
+        OCT: 'PAGADO',
+        NOV: 'PAGADO',
+        DIC: null,
+        ENE: null,
+        FEB: null
+      },
+      fecha: '15/08/2024',
+      totalPagado: '$900',
+      aula: 'Aula 35',
+      cargo: 'Estudiante',
+      conceptos: [
+        { id: 103, nombre: 'Inscripción', estado: 'S' },
+        { id: 104, nombre: 'Mensualidad', estado: 'S' },
+        { id: 105, nombre: 'Material', estado: 'S' }
+      ]
     }
-  };
+  ];
 
-  // Datos mock eliminados - ahora se cargan del backend
+  const meses = ['AGO', 'SEP', 'OCT', 'NOV', 'DIC', 'ENE', 'FEB'];
+
+  // Lista de alumnos para el selector
+  const alumnos = [
+    { id: 1, nombre: 'Sarah Alicia Gutiérrez Hernández' },
+    { id: 2, nombre: 'Ian Karim Villalba Romero' },
+    { id: 3, nombre: 'Cristian Jair Alcantar Cienfuegos' },
+    // ... más alumnos
+  ];
 
   const handleStudentSelect = (id: number, isSelected: boolean) => {
     if (isSelected) {
@@ -101,7 +899,7 @@ const MensualidadesSection = () => {
 
   const handleSelectAll = (isSelected: boolean) => {
     if (isSelected) {
-      setSelectedStudents(filteredMensualidades.map(mensualidad => mensualidad.alumnoId));
+      setSelectedStudents(mensualidades.map(mensualidad => mensualidad.id));
     } else {
       setSelectedStudents([]);
     }
@@ -109,15 +907,15 @@ const MensualidadesSection = () => {
 
   const handleRegisterPayment = () => {
     if (selectedStudents.length === 1) {
-      const selectedStudent = mensualidades.find(m => m.alumnoId === selectedStudents[0]);
+      const selectedStudent = mensualidades.find(m => m.id === selectedStudents[0]);
       if (selectedStudent) {
         // Encontrar el primer mes pendiente
-        const primerMesPendiente = meses.find(mes => selectedStudent.pagosPorMes[mes] === null);
+        const primerMesPendiente = meses.find(mes => selectedStudent.pagos[mes] === null);
         
         setPaymentData(prev => ({
           ...prev,
-          alumno: selectedStudent.alumnoId.toString(),
-          monto: selectedStudent.montoMensualidad.toString(),
+          alumno: selectedStudent.id.toString(),
+          monto: selectedStudent.mensualidad.replace('$', ''),
           mes: primerMesPendiente || ''
         }));
         setIsPaymentModalOpen(true);
@@ -125,104 +923,42 @@ const MensualidadesSection = () => {
     }
   };
 
-  const handleEdit = async () => {
+  const handleEdit = () => {
     if (selectedStudents.length === 1) {
-      const selectedStudent = mensualidades.find(m => m.alumnoId === selectedStudents[0]);
+      const selectedStudent = mensualidades.find(m => m.id === selectedStudents[0]);
       if (selectedStudent) {
-        // Buscar la primera mensualidad pagada del alumno
-        const añoActual = new Date().getFullYear();
-        try {
-          const mensualidadesAlumno = await mensualidadesApi.getByAlumno(selectedStudent.alumnoId, añoActual);
-          const mensualidadPagada = mensualidadesAlumno.data.find((m: any) => m.estado === 1);
-          
-          if (mensualidadPagada) {
-            setCurrentMensualidadId(mensualidadPagada.id);
-            setPaymentData(prev => ({
-              ...prev,
-              alumno: selectedStudent.alumnoId.toString(),
-              monto: mensualidadPagada.monto.toString(),
-              mes: numberToMes[mensualidadPagada.mes] || '',
-              concepto: mensualidadPagada.concepto === 1 ? 'Inscripción' : 
-                       mensualidadPagada.concepto === 2 ? 'Mensualidad' :
-                       mensualidadPagada.concepto === 3 ? 'Material' : 'Otro',
-              metodoPago: mensualidadPagada.metodoPago === 1 ? 'Efectivo' :
-                         mensualidadPagada.metodoPago === 2 ? 'Transferencia' :
-                         mensualidadPagada.metodoPago === 3 ? 'Tarjeta' : 'Otro',
-              fecha: mensualidadPagada.fechaPago ? mensualidadPagada.fechaPago.split('T')[0] : '',
-              observaciones: mensualidadPagada.observaciones || ''
-            }));
-            setIsEditing(true);
-            setIsPaymentModalOpen(true);
-          }
-        } catch (err) {
-          console.error('Error loading payment data:', err);
-        }
+        // Encontrar el primer mes pagado para editar
+        const primerMesPagado = meses.find(mes => selectedStudent.pagos[mes] === 'PAGADO');
+        
+        setPaymentData(prev => ({
+          ...prev,
+          alumno: selectedStudent.id.toString(),
+          monto: selectedStudent.mensualidad.replace('$', ''),
+          mes: primerMesPagado || '',
+          concepto: 'Mensualidad',
+          metodoPago: 'Efectivo' // Valor por defecto
+        }));
+        setIsEditing(true);
+        setIsPaymentModalOpen(true);
       }
     }
   };
 
-  const handleSavePayment = async () => {
-    try {
-      const añoActual = new Date().getFullYear();
-      const mesNumber = mesToNumber[paymentData.mes];
-      
-      if (!mesNumber) {
-        alert('Por favor seleccione un mes válido');
-        return;
-      }
-
-      const conceptoMap: Record<string, number> = {
-        'Inscripción': 1,
-        'Mensualidad': 2,
-        'Material': 3,
-        'Otro': 4
-      };
-
-      const metodoPagoMap: Record<string, number> = {
-        'Efectivo': 1,
-        'Transferencia': 2,
-        'Tarjeta': 3,
-        'Otro': 4
-      };
-
-      const dto: MensualidadDTO = {
-        alumnoId: parseInt(paymentData.alumno),
-        mes: mesNumber,
-        año: añoActual,
-        monto: parseFloat(paymentData.monto),
-        estado: 1, // Pagado
-        fechaPago: paymentData.fecha || new Date().toISOString().split('T')[0],
-        concepto: conceptoMap[paymentData.concepto] || 2,
-        metodoPago: metodoPagoMap[paymentData.metodoPago] || 1,
-        observaciones: paymentData.observaciones || undefined
-      };
-
-      if (isEditing && currentMensualidadId) {
-        await mensualidadesApi.update(currentMensualidadId, dto);
-      } else {
-        await mensualidadesApi.create(dto);
-      }
-
-      // Recargar datos
-      await loadData();
-      
-      setIsPaymentModalOpen(false);
-      setPaymentData({
-        fecha: '',
-        monto: '',
-        concepto: '',
-        metodoPago: '',
-        observaciones: '',
-        alumno: '',
-        mes: ''
-      });
-      setSelectedStudents([]);
-      setIsEditing(false);
-      setCurrentMensualidadId(null);
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Error al guardar el pago');
-      console.error('Error saving payment:', err);
-    }
+  const handleSavePayment = () => {
+    // Aquí iría la lógica para guardar el pago
+    console.log('Guardando pago:', paymentData);
+    setIsPaymentModalOpen(false);
+    setPaymentData({
+      fecha: '',
+      monto: '',
+      concepto: '',
+      metodoPago: '',
+      observaciones: '',
+      alumno: '',
+      mes: ''
+    });
+    setSelectedStudents([]);
+    setIsEditing(false);
   };
 
   const handleFilterChange = (key: string, value: string) => {
@@ -253,11 +989,6 @@ const MensualidadesSection = () => {
   };
 
   const filteredMensualidades = mensualidades.filter(mensualidad => {
-    // Filtro por búsqueda
-    if (searchTerm && !mensualidad.alumnoNombre.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false;
-    }
-
     // Si no hay filtros activos, mostrar todos los alumnos
     if (Object.keys(activeFilters).length === 0) {
       return true;
@@ -268,27 +999,27 @@ const MensualidadesSection = () => {
       switch (key) {
         case 'estadoPago':
           if (value === 'PAGADO') {
-            return Object.values(mensualidad.pagosPorMes).some(pago => pago === 'PAGADO');
+            return Object.values(mensualidad.pagos).some(pago => pago === 'PAGADO');
           } else if (value === 'PENDIENTE') {
-            return Object.values(mensualidad.pagosPorMes).some(pago => pago === 'PENDIENTE');
+            return Object.values(mensualidad.pagos).some(pago => pago === 'PENDIENTE');
           }
           return true;
         case 'mes':
-          return mensualidad.pagosPorMes[value] !== undefined;
+          return mensualidad.pagos[value] !== undefined;
         default:
           return true;
       }
     });
   });
 
-  const handleMensualidadClick = (mensualidad: MensualidadResumenDTO) => {
+  const handleMensualidadClick = (mensualidad) => {
     setSelectedMensualidad(mensualidad);
     setIsModalOpen(true);
   };
 
-  const handleSaveMensualidad = async () => {
-    // Esta función puede ser usada para guardar conceptos adicionales si es necesario
-    // Por ahora solo cerramos el modal
+  const handleSaveMensualidad = () => {
+    // Aquí iría la lógica para guardar la mensualidad
+    console.log('Guardando mensualidad:', selectedMensualidad);
     setIsModalOpen(false);
     setSelectedMensualidad(null);
   };
@@ -298,9 +1029,9 @@ const MensualidadesSection = () => {
     console.log('Imprimiendo lista de mensualidades');
   };
 
-  const handleEstadoChange = (conceptoId: number, estado: string) => {
-    // Esta función puede ser usada para cambiar el estado de conceptos si es necesario
-    console.log(`Concepto ${conceptoId} estado cambiado a ${estado}`);
+  const handleEstadoChange = (conceptoId, estado) => {
+    // Placeholder function, might be removed or repurposed
+    console.log(`Concepto ${conceptoId} estado cambiado a ${estado} (placeholder)`);
   };
 
   // Función para obtener las iniciales del nombre
@@ -349,7 +1080,7 @@ const MensualidadesSection = () => {
                 />
                  <Button
                   size="sm"
-                  className="bg-green-700 hover:bg-green-800 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-green-700 hover:bg-green-800 text-sm"
                   onClick={handleRegisterPayment}
                   disabled={selectedStudents.length !== 1}
                 >
@@ -440,7 +1171,7 @@ const MensualidadesSection = () => {
                           <input
                             type="checkbox"
                             className="rounded"
-                            checked={filteredMensualidades.length > 0 && filteredMensualidades.every(m => selectedStudents.includes(m.alumnoId))}
+                            checked={selectedStudents.length === filteredMensualidades.length && filteredMensualidades.length > 0}
                             onChange={(e) => handleSelectAll(e.target.checked)}
                           />
                   </th>
@@ -453,41 +1184,22 @@ const MensualidadesSection = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                      {loading ? (
-                        <tr>
-                          <td colSpan={10} className="px-3 py-8 text-center text-gray-500">
-                            Cargando datos...
-                          </td>
-                        </tr>
-                      ) : error ? (
-                        <tr>
-                          <td colSpan={10} className="px-3 py-8 text-center text-red-500">
-                            {error}
-                          </td>
-                        </tr>
-                      ) : filteredMensualidades.length === 0 ? (
-                        <tr>
-                          <td colSpan={10} className="px-3 py-8 text-center text-gray-500">
-                            No se encontraron mensualidades
-                          </td>
-                        </tr>
-                      ) : (
-                        filteredMensualidades.map((item) => (
-                  <tr key={item.alumnoId} className="hover:bg-blue-50 transition-colors">
+                      {filteredMensualidades.map((item) => (
+                  <tr key={item.id} className="hover:bg-blue-50 transition-colors">
                           <td className="px-3 py-2">
                             <input
                               type="checkbox"
                               className="rounded"
-                              checked={selectedStudents.includes(item.alumnoId)}
-                              onChange={(e) => handleStudentSelect(item.alumnoId, e.target.checked)}
+                              checked={selectedStudents.includes(item.id)}
+                              onChange={(e) => handleStudentSelect(item.id, e.target.checked)}
                             />
                     </td>
                           <td className="px-3 py-2 text-sm font-medium text-gray-900">
                             <div className="flex items-center gap-2">
                               <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-medium">
-                                {getInitials(item.alumnoNombre)}
+                                {getInitials(item.nombre)}
                               </div>
-                              {item.alumnoNombre}
+                              {item.nombre}
                             </div>
                           </td>
                           <td className="px-3 py-2 text-sm text-gray-700">
@@ -495,27 +1207,26 @@ const MensualidadesSection = () => {
                         {item.curso}
                       </Badge>
                     </td>
-                          <td className="px-3 py-2 text-sm font-semibold text-gray-900">${item.montoMensualidad.toFixed(2)}</td>
+                          <td className="px-3 py-2 text-sm font-semibold text-gray-900">{item.mensualidad}</td>
                     {meses.map(mes => (
                             <td key={mes} className="px-2 py-2 text-center">
-                        {item.pagosPorMes[mes] === 'PAGADO' && (
+                        {item.pagos[mes] === 'PAGADO' && (
                           <Badge className="bg-green-500 hover:bg-green-600 text-white text-sm">
                             PAGADO
                           </Badge>
                         )}
-                        {item.pagosPorMes[mes] === 'PENDIENTE' && (
+                        {item.pagos[mes] === 'PENDIENTE' && (
                           <Badge variant="destructive" className="text-sm">
                             PENDIENTE
                           </Badge>
                         )}
-                        {item.pagosPorMes[mes] === null && (
+                        {item.pagos[mes] === null && (
                           <span className="text-gray-300">-</span>
                         )}
                       </td>
                     ))}
                   </tr>
-                ))
-                      )}
+                ))}
               </tbody>
             </table>
                 </div>
@@ -736,44 +1447,49 @@ const MensualidadesSection = () => {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-blue-900 text-lg">{selectedMensualidad.curso}</h3>
                     <Badge variant="secondary" className="text-sm">
-                      {fecha}
+                      {selectedMensualidad.fecha}
                     </Badge>
                   </div>
                   <div className="text-base text-blue-700">
-                    <p>Alumno: {selectedMensualidad.alumnoNombre}</p>
-                    <p>Total Pagado: ${selectedMensualidad.totalPagado.toFixed(2)}</p>
+                    <p>Alumno: {selectedMensualidad.nombre}</p>
+                    <p>Aula: {selectedMensualidad.aula}</p>
                   </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-base">
                     <thead>
                       <tr className="bg-gray-100">
-                        <th className="border p-3 text-left">Mes</th>
-                        <th className="border p-3 text-center">Estado</th>
+                        <th className="border p-3 text-left">Concepto</th>
                         <th className="border p-3 text-center">Monto</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {meses.map((mes) => {
-                        const estado = selectedMensualidad.pagosPorMes[mes];
-                        return (
-                          <tr key={mes} className="hover:bg-gray-50">
-                            <td className="border p-3">{mes}</td>
-                            <td className="border p-3 text-center">
-                              {estado === 'PAGADO' ? (
-                                <Badge className="bg-green-500 text-white">PAGADO</Badge>
-                              ) : estado === 'PENDIENTE' ? (
-                                <Badge variant="destructive">PENDIENTE</Badge>
-                              ) : (
-                                <span className="text-gray-400">-</span>
-                              )}
-                            </td>
-                            <td className="border p-3 text-center">
-                              ${selectedMensualidad.montoMensualidad.toFixed(2)}
-                            </td>
-                          </tr>
-                        );
-                      })}
+                      {selectedMensualidad.conceptos.map((concepto) => (
+                        <tr key={concepto.id} className="hover:bg-gray-50">
+                          <td className="border p-3">{concepto.nombre}</td>
+                          <td className="border p-3 text-center">
+                            <div className="flex flex-wrap justify-center gap-3">
+                              {(['S', 'N', 'J'] as const).map((tipo) => (
+                                <Button
+                                  key={tipo}
+                                  size="lg"
+                                  variant="outline"
+                                  className={`h-10 px-6 text-lg font-bold border-2
+                                    ${concepto.estado === tipo ?
+                                      tipo === 'S' ? 'border-green-500 bg-green-100 text-green-700' :
+                                      tipo === 'N' ? 'border-red-500 bg-red-100 text-red-700' :
+                                      'border-yellow-500 bg-yellow-100 text-yellow-700'
+                                    : 'border-gray-300'}
+                                  `}
+                                  onClick={() => handleEstadoChange(concepto.id, tipo)}
+                                >
+                                  {tipo}
+                                </Button>
+                              ))}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>

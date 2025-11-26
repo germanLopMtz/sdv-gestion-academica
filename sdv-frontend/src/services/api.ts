@@ -84,57 +84,5 @@ export const horariosApi = {
         apiClient.post<T>("/Schedule/seed", {}),
 };
 
-// Avisos
-export const avisosApi = {
-    create: <T = unknown>(data: unknown, usuarioCreadorId: number): Promise<AxiosResponse<T>> =>
-        apiClient.post<T>("/avisos", data, {
-            params: { usuarioCreadorId }
-        }),
-    getAll: <T = unknown>(): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>("/avisos"),
-    getById: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/avisos/${id}`),
-    update: <T = unknown>(id: number, data: unknown): Promise<AxiosResponse<T>> =>
-        apiClient.put<T>(`/avisos/${id}`, data),
-    remove: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
-        apiClient.delete<T>(`/avisos/${id}`),
-    getByEstado: <T = unknown>(estado: string): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/avisos/estado/${estado}`),
-    getByMaestro: <T = unknown>(maestroId: number): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/avisos/maestro/${maestroId}`),
-    enviar: <T = unknown>(id: number, usuarioId: number): Promise<AxiosResponse<T>> =>
-        apiClient.post<T>(`/avisos/${id}/enviar`, {}, { params: { usuarioId } }),
-    cancelar: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
-        apiClient.post<T>(`/avisos/${id}/cancelar`, {}),
-    marcarLeido: <T = unknown>(avisoId: number, maestroId: number): Promise<AxiosResponse<T>> =>
-        apiClient.post<T>(`/avisos/${avisoId}/marcar-leido/${maestroId}`, {}),
-    buscar: <T = unknown>(searchTerm: string): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/avisos/buscar?searchTerm=${encodeURIComponent(searchTerm)}`),
-};
-
-// Mensualidades
-export const mensualidadesApi = {
-    create: <T = unknown>(data: unknown): Promise<AxiosResponse<T>> =>
-        apiClient.post<T>("/Mensualidades", data),
-    getAll: <T = unknown>(): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>("/Mensualidades"),
-    getResumen: <T = unknown>(año?: number): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>("/Mensualidades/resumen", { params: año ? { año } : {} }),
-    getById: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/Mensualidades/${id}`),
-    getByAlumno: <T = unknown>(alumnoId: number, año?: number): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/Mensualidades/alumno/${alumnoId}`, { params: año ? { año } : {} }),
-    getByMes: <T = unknown>(mes: number, año: number): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/Mensualidades/mes/${mes}/año/${año}`),
-    getByEstado: <T = unknown>(estado: number, año?: number): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/Mensualidades/estado/${estado}`, { params: año ? { año } : {} }),
-    buscar: <T = unknown>(searchTerm: string): Promise<AxiosResponse<T>> =>
-        apiClient.get<T>(`/Mensualidades/buscar?searchTerm=${encodeURIComponent(searchTerm)}`),
-    update: <T = unknown>(id: number, data: unknown): Promise<AxiosResponse<T>> =>
-        apiClient.put<T>(`/Mensualidades/${id}`, data),
-    remove: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
-        apiClient.delete<T>(`/Mensualidades/${id}`),
-};
-
 export type { AxiosResponse };
 

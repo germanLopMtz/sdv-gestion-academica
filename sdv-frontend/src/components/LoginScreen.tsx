@@ -29,10 +29,6 @@ const LoginScreen = ({ onLogin }: LoginScreenProps) => {
       });
       
       if (res.status >= 200 && res.status < 300) {
-        // Guardar usuario en localStorage
-        const userData = res.data;
-        localStorage.setItem('user', JSON.stringify(userData));
-        console.log('✅ Usuario guardado en localStorage:', userData);
         onLogin();
       }
     } catch (error: any) {

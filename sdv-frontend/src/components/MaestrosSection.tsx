@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 
 import { maestrosService } from '../services/maestrosService';
-import { MaestroOutPutDTO, Maestro, mapMaestroToDisplay, mapMaestroToForm, CursoType, ModalidadCurso, MaestroDTO } from '../types/maestro';
+import { MaestroOutPutDTO, Maestro, mapMaestroToDisplay, CursoType, ModalidadCurso, MaestroDTO } from '../types/maestro';
 
 // Funciones de mapeo para el formulario
 const getCursoDisplayName = (tipo: CursoType, numeroDiplomado?: number, especialidad?: string): string => {
@@ -108,7 +108,6 @@ const MaestrosSection = () => {
   });
 
   const [maestros, setMaestros] = useState<Maestro[]>([]);
-  const [maestrosOriginales, setMaestrosOriginales] = useState<MaestroOutPutDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -118,7 +117,6 @@ const MaestrosSection = () => {
   const loadMaestros = async () => {
     try {
       const data: MaestroOutPutDTO[] = await maestrosService.getAll();
-      setMaestrosOriginales(data); // Guardar datos originales
       const displayMaestros = data.map(mapMaestroToDisplay);
       setMaestros(displayMaestros);
       setLoading(false);
@@ -199,20 +197,22 @@ const MaestrosSection = () => {
 
   const handleEditClick = () => {
     if (selectedMaestros.length === 1) {
-      // Buscar el maestro en los datos originales del backend
-      const maestroOriginal = maestrosOriginales.find(m => m.id === selectedMaestros[0]);
-      if (maestroOriginal) {
-        console.log('🔧 Maestro original encontrado:', maestroOriginal);
-        
-        // Mapear los datos originales al formato del formulario
-        const datosFormulario = mapMaestroToForm(maestroOriginal);
-        console.log('📝 Datos para el formulario:', datosFormulario);
-        
-        setNewMaestro(datosFormulario);
+      const maestroToEdit = maestros.find(m => m.id === selectedMaestros[0]);
+      if (maestroToEdit) {
+        setNewMaestro({
+          nombre: maestroToEdit.nombre,
+          curso: maestroToEdit.curso,
+          fechaNac: maestroToEdit.fechaNac,
+          telefono: maestroToEdit.telefono,
+          email: maestroToEdit.email,
+          procedencia: maestroToEdit.procedencia,
+          modalidad: maestroToEdit.modalidad,
+          direccion: '', // Estos campos no están en el objeto display, se dejarán vacíos para edición
+          especialidad: '',
+          contrasena: ''
+        });
         setIsEditing(true);
         setIsModalOpen(true);
-      } else {
-        console.error('❌ No se encontró el maestro original con ID:', selectedMaestros[0]);
       }
     }
   };
@@ -332,12 +332,12 @@ const MaestrosSection = () => {
       
       console.log('Maestros eliminados exitosamente');
       
-     
+      // Recargar la lista después de eliminar
       await loadMaestros();
       
     } catch (error) {
       console.error('Error al eliminar maestros:', error);
-      
+      // Aquí podrías mostrar un mensaje de error al usuario
     }
     
     setSelectedMaestros([]);
@@ -424,7 +424,7 @@ const MaestrosSection = () => {
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
                   </svg>
-                  FILTRAR 
+                  FILTRAR
                 </Button>
               </div>
             </CardTitle>
