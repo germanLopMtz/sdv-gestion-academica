@@ -1,5 +1,6 @@
 using sdv_backend.Data.DataDB;
 using Microsoft.EntityFrameworkCore;
+using sdv_backend.Infraestructure;
 using sdv_backend.Infraestructure.API_Service_Interfaces;
 using sdv_backend.Infraestructure.API_Services;
 
@@ -20,8 +21,6 @@ builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAlumnoService, AlumnoService>();
 builder.Services.AddScoped<IMaestroService, MaestroService>(); // Nuevo servicio de maestros
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
-builder.Services.AddScoped<IAsistenciaService, AsistenciaService>(); 
-
 
 // CORS para permitir el frontend (Vite y otros dev servers)
 builder.Services.AddCors(options =>
