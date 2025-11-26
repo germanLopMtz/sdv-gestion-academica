@@ -20,6 +20,9 @@ namespace sdv_backend.Data.DataDB
         // Nuevas entidades para Avisos
         public DbSet<Aviso> Avisos => Set<Aviso>();
         public DbSet<AvisoDestinatario> AvisoDestinatarios => Set<AvisoDestinatario>();
+        
+        // Entidad para Mensualidades
+        public DbSet<Mensualidad> Mensualidades => Set<Mensualidad>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -75,6 +78,13 @@ namespace sdv_backend.Data.DataDB
                 .HasForeignKey(ad => ad.MaestroId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Configuración de relaciones para Mensualidades
+            modelBuilder.Entity<Mensualidad>()
+                .HasOne(m => m.Alumno)
+                .WithMany()
+                .HasForeignKey(m => m.AlumnoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Índices únicos existentes
             modelBuilder.Entity<ClassSchedule>()
                 .HasIndex(cs => new { cs.MaestroId, cs.DayOfWeek, cs.TimeSlotId })
@@ -87,6 +97,11 @@ namespace sdv_backend.Data.DataDB
             // Índice único para evitar destinatarios duplicados
             modelBuilder.Entity<AvisoDestinatario>()
                 .HasIndex(ad => new { ad.AvisoId, ad.MaestroId })
+                .IsUnique();
+
+            // Índice único para evitar mensualidades duplicadas
+            modelBuilder.Entity<Mensualidad>()
+                .HasIndex(m => new { m.AlumnoId, m.Mes, m.Año, m.Concepto })
                 .IsUnique();
         }
     }
