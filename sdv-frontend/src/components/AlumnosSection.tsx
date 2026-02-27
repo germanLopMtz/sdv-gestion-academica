@@ -12,13 +12,19 @@ import { alumnosApi, apiClient } from '@/services/api';
 
 // Mapas para traducir enums del backend a etiquetas legibles
 const cursoTypeToLabel: Record<number, string> = {
-  1: 'Seminario',
-  2: 'Diplomado',
+  1: 'Seminario Doblaje y Locución 1',
+  2: 'Seminario Doblaje y Locución 2',
+  3: 'Diplomado N4',
+  4: 'Diplomado N5',
+  5: 'Influencer Kids 1',
+  6: 'Influencer Kids 2',
+  7: 'Club Masters',
+
 };
 
 const modalidadToLabel: Record<number, string> = {
-  1: 'presencial',
-  2: 'virtual',
+  1: 'Presencial',
+  2: 'Virtual',
 };
 
 const AlumnosSection = () => {
@@ -67,11 +73,14 @@ const AlumnosSection = () => {
   };
 
   const handleTipoCursoChange = (value: string) => {
+    const tipoNum = parseInt(value);
+    const cursoLabel = value ? cursoTypeToLabel[tipoNum] : '';
+    
     setNewStudent(prev => ({
       ...prev,
       tipoCurso: value,
-      curso: value === 'Diplomado' ? `Diplomado N${prev.numeroDiplomado}` : 'Seminario',
-      numeroDiplomado: value === 'Diplomado' ? prev.numeroDiplomado : ''
+      curso: cursoLabel,
+      numeroDiplomado: (tipoNum === 3 || tipoNum === 4) ? prev.numeroDiplomado : ''
     }));
   };
 
@@ -117,7 +126,7 @@ const AlumnosSection = () => {
       // Mapear los datos del frontend al formato del backend
       const studentToUpdate = {
         nombreCompleto: newStudent.nombre,
-        tipoDeCurso: newStudent.tipoCurso === 'Diplomado' ? 2 : 1,
+        tipoDeCurso: newStudent.tipoCurso ? parseInt(newStudent.tipoCurso) : 1,
         modalidad: newStudent.modalidad === 'virtual' ? 2 : 1,
         fechaNacimiento: newStudent.fechaNac, // Mantener formato YYYY-MM-DD
         telefono: newStudent.telefono,
@@ -178,7 +187,7 @@ const AlumnosSection = () => {
         Telefono: newStudent.telefono,
         CorreoElectronico: newStudent.email,
         Procedencia: newStudent.procedencia,
-        TipoDeCurso: newStudent.tipoCurso === 'Diplomado' ? 2 : 1,
+        TipoDeCurso: newStudent.tipoCurso ? parseInt(newStudent.tipoCurso) : 1,
         Modalidad: newStudent.modalidad === 'virtual' ? 2 : 1,
         // Agregar número de diplomado para alumnos nuevos
         NumeroDiplomado: newStudent.numeroDiplomado && newStudent.numeroDiplomado !== '' 
@@ -260,9 +269,8 @@ const AlumnosSection = () => {
         console.log('  - diplomadoNumero:', student.diplomadoNumero);
         console.log('  - numeroD:', student.numeroD);
         
-        // Mapear tipoDeCurso (número) a texto (con mayúsculas para el dropdown)
-        const tipoCurso = student.tipoDeCurso === 2 ? 'Diplomado' : 
-                         student.tipoDeCurso === 1 ? 'Seminario' : 'Seminario'; // default Seminario
+        // Mapear tipoDeCurso (número) a texto
+        const tipoCurso = String(student.tipoDeCurso || 1);
         console.log('🎯 TipoCurso mapeado:', tipoCurso, 'desde valor:', student.tipoDeCurso);
         
         // Mapear modalidad (número) a texto
@@ -289,11 +297,12 @@ const AlumnosSection = () => {
         }
         console.log('🎯 Número diplomado del backend:', numeroDiplomado);
         
+        const cursoLabel = cursoTypeToLabel[parseInt(tipoCurso)] || '';
         const formData = {
           nombre: student.nombreCompleto || '',
           tipoCurso: tipoCurso,
           numeroDiplomado: numeroDiplomado,
-          curso: tipoCurso === 'Diplomado' ? `Diplomado N${numeroDiplomado}` : 'Seminario',
+          curso: cursoLabel,
           fechaNac: fechaNac,
           telefono: student.telefono || '',
           email: student.correoElectronico || '',
@@ -319,8 +328,7 @@ const AlumnosSection = () => {
         if (student) {
           console.log('✅ ALUMNO ENCONTRADO EN DATOS LOCALES:', student);
           
-          const tipoCurso = student.TipoDeCurso === 2 ? 'diplomado' : 
-                           student.TipoDeCurso === 1 ? 'seminario' : '';
+          const tipoCurso = String(student.TipoDeCurso || 1);
           const modalidad = student.Modalidad === 2 ? 'virtual' : 'presencial';
           
           let fechaNac = '';
@@ -329,14 +337,15 @@ const AlumnosSection = () => {
             fechaNac = date.toISOString().split('T')[0];
           }
           
-          const numeroDiplomado = tipoCurso === 'diplomado' ? 
+          const numeroDiplomado = tipoCurso === 'Diplomado' ? 
             (student.curso?.match(/N(\d+)/) ? student.curso.match(/N(\d+)/)[1] : '') : '';
           
+          const cursoLabel = cursoTypeToLabel[parseInt(tipoCurso)] || '';
           const formData = {
             nombre: student.NombreCompleto || '',
             tipoCurso: tipoCurso,
             numeroDiplomado: numeroDiplomado,
-            curso: tipoCurso === 'diplomado' ? `Diplomado N${numeroDiplomado}` : 'Seminario',
+            curso: cursoLabel,
             fechaNac: fechaNac,
             telefono: student.Telefono || '',
             email: student.CorreoElectronico || '',
@@ -1121,12 +1130,17 @@ const AlumnosSection = () => {
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Seleccione el tipo de curso</option>
-                    <option value="Seminario">Seminario</option>
-                    <option value="Diplomado">Diplomado</option>
+                    <option value="1">Seminario Doblaje y Locución 1</option>
+                    <option value="2">Seminario Doblaje y Locución 2</option>
+                    <option value="3">Diplomado N4</option>
+                    <option value="4">Diplomado N5</option>
+                    <option value="5">Influencer Kids 1</option>
+                    <option value="6">Influencer Kids 2</option>
+                    <option value="7">Club Masters</option>
                   </select>
                 </div>
               </div>
-              {newStudent.tipoCurso === 'Diplomado' && (
+              {(newStudent.tipoCurso === '3' || newStudent.tipoCurso === '4') && (
                 <div className="space-y-2">
                   <Label htmlFor="numeroDiplomado">Número de Diplomado</Label>
                   <Input
@@ -1280,9 +1294,14 @@ const AlumnosSection = () => {
                     className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Seleccione el curso</option>
-                    <option value="Seminario">Seminario</option>
+                    <option value="Seminario Doblaje y Locuci\u00f3n 1">Seminario Doblaje y Locuci\u00f3n 1</option>
+                    <option value="Seminario Doblaje y Locuci\u00f3n 2">Seminario Doblaje y Locuci\u00f3n 2</option>
+                    <option value="Diplomado N4">Diplomado N4</option>
                     <option value="Diplomado N5">Diplomado N5</option>
                     <option value="Diplomado N6">Diplomado N6</option>
+                    <option value="Influencer Kids 1">Influencer Kids 1</option>
+                    <option value="Influencer Kids 2">Influencer Kids 2</option>
+                    <option value="Club Masters">Club Masters</option>
                   </select>
                 </div>
                 <div className="space-y-2">

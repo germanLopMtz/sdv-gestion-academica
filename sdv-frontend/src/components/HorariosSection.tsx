@@ -72,12 +72,33 @@ const modalidadOptions = [
 ];
 
 const tipoCursoOptions = [
-  { value: 1, label: 'Seminario' },
-  { value: 2, label: 'Diplomado' },
+  { value: 1, label: 'Seminario Doblaje y Locución 1' },
+  { value: 2, label: 'Seminario Doblaje y Locución 2' },
+  { value: 3, label: 'Diplomado N4' },
+  { value: 4, label: 'Diplomado N5' },
+  { value: 5, label: 'Influencer Kids 1' },
+  { value: 6, label: 'Influencer Kids 2' },
+  { value: 7, label: 'Club Masters' },
 ];
 
 const HorariosSection = () => {
   const { toast: showToast } = useToast();
+  
+  // Función para obtener capacidad máxima según tipo de curso
+  const getMaxCapacity = (tipoDeCurso: string | number): number => {
+    const tipo = parseInt(tipoDeCurso.toString());
+    switch (tipo) {
+      case 1: return 12; // Seminario Doblaje y Locución 1
+      case 2: return 5;  // Seminario Doblaje y Locución 2
+      case 3: return 5;  // Diplomado N4
+      case 4: return 5;  // Diplomado N5
+      case 5: return 12; // Influencer Kids 1
+      case 6: return 7;  // Influencer Kids 2
+      case 7: return 6;  // Club Masters
+      default: return 5;
+    }
+  };
+  
   const [schedules, setSchedules] = useState<ClassSchedule[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
@@ -182,9 +203,10 @@ const HorariosSection = () => {
     if (formData.alumnoIds.length === 0) errors.push('Debe seleccionar al menos un alumno');
 
     // Validar cupo máximo
-    const maxCapacity = formData.tipoDeCurso === '2' ? 5 : 12; // Diplomado: 5, Seminario: 12
+    const maxCapacity = getMaxCapacity(formData.tipoDeCurso);
     if (formData.alumnoIds.length > maxCapacity) {
-      errors.push(`El cupo máximo para ${formData.tipoDeCurso === '2' ? 'Diplomado' : 'Seminario'} es de ${maxCapacity} alumnos`);
+      const tipoCursoLabel = tipoCursoOptions.find(t => t.value.toString() === formData.tipoDeCurso)?.label || 'Este curso';
+      errors.push(`El cupo máximo para ${tipoCursoLabel} es de ${maxCapacity} alumnos`);
     }
 
     // Validar horario 8-10 PM en viernes/sábado
@@ -344,10 +366,6 @@ const HorariosSection = () => {
     });
   };
 
-  const getMaxCapacity = () => {
-    return formData.tipoDeCurso === '2' ? 5 : 12;
-  };
-
   const isTimeSlotDisabled = (timeSlotId: number) => {
     if (!formData.dayOfWeek) return false;
     const dayOfWeekNum = parseInt(formData.dayOfWeek);
@@ -375,8 +393,11 @@ const HorariosSection = () => {
                 <SelectTrigger className="border-blue-300 focus:ring-blue-500 focus:border-blue-500"><SelectValue placeholder="Todos" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="1">Seminario</SelectItem>
-                  <SelectItem value="2">Diplomado</SelectItem>
+                  {tipoCursoOptions.map((tipo) => (
+                    <SelectItem key={tipo.value} value={tipo.value.toString()}>
+                      {tipo.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -672,7 +693,7 @@ const HorariosSection = () => {
                 <Select
                   value={formData.tipoDeCurso}
                   onValueChange={(value) => {
-                    const maxCapacity = value === '2' ? 5 : 12;
+                  const maxCapacity = getMaxCapacity(value);
                     const newAlumnoIds = formData.alumnoIds.slice(0, maxCapacity);
                     setFormData({
                       ...formData,
@@ -689,7 +710,7 @@ const HorariosSection = () => {
                       <SelectItem key={tipo.value} value={tipo.value.toString()}>
                         {tipo.label}
                       </SelectItem>
-                    ))}
+                    ))}"
                   </SelectContent>
                 </Select>
               </div>
@@ -697,7 +718,7 @@ const HorariosSection = () => {
 
             <div>
               <Label>
-                Alumnos * (Máximo: {getMaxCapacity()}) - Seleccionados: {formData.alumnoIds.length}
+                Alumnos * (Máximo: {getMaxCapacity(formData.tipoDeCurso)}) - Seleccionados: {formData.alumnoIds.length}
               </Label>
               <div className="border rounded-md p-4 max-h-48 overflow-y-auto mt-2">
                 {alumnos.length === 0 ? (
@@ -706,7 +727,7 @@ const HorariosSection = () => {
                   <div className="space-y-2">
                     {alumnos.map((alumno) => {
                       const isSelected = formData.alumnoIds.includes(alumno.id);
-                      const isDisabled = !isSelected && formData.alumnoIds.length >= getMaxCapacity();
+                      const isDisabled = !isSelected && formData.alumnoIds.length >= getMaxCapacity(formData.tipoDeCurso);
                       return (
                         <div
                           key={alumno.id}

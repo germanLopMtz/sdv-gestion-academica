@@ -152,11 +152,11 @@ if (entity == null) return null;
      throw new InvalidOperationException("Debe seleccionar una modalidad válida.");
 
         // Validar número de diplomado para diplomados
-            if (dto.TipoDeCurso == CursoType.Diplomado && !dto.NumeroDiplomado.HasValue)
+            if (dto.TipoDeCurso == CursoType.DiplomadoN4 && !dto.NumeroDiplomado.HasValue)
     throw new InvalidOperationException("El número de diplomado es requerido para diplomados.");
 
  // Validar que no sea necesario número de diplomado para seminarios
-            if (dto.TipoDeCurso == CursoType.Seminario && dto.NumeroDiplomado.HasValue)
+            if (dto.TipoDeCurso == CursoType.Seminario1 && dto.NumeroDiplomado.HasValue)
         throw new InvalidOperationException("Los seminarios no requieren número de diplomado.");
         }
 

@@ -7,6 +7,8 @@ using sdv_backend.Domain.OutPutDTO;
 using Microsoft.EntityFrameworkCore;
 using sdv_backend.Infraestructure.API_Service_Interfaces;
 
+
+
 namespace sdv_backend.Infraestructure.API_Services
 {
     public class AlumnoService : IAlumnoService
@@ -25,15 +27,15 @@ namespace sdv_backend.Infraestructure.API_Services
             await ValidateEmailUniqueAsync(dto.CorreoElectronico);
 
             var entity = new Alumno
- {
-        NombreCompleto = dto.NombreCompleto,
-        TipoDeCurso = dto.TipoDeCurso,
-         FechaNacimiento = dto.FechaNacimiento,
+            {
+                NombreCompleto = dto.NombreCompleto,
+                TipoDeCurso = dto.TipoDeCurso,
+                FechaNacimiento = dto.FechaNacimiento,
                 Procedencia = dto.Procedencia,
-   Modalidad = dto.Modalidad,
-      CorreoElectronico = dto.CorreoElectronico.Trim().ToLower(),
-      Telefono = dto.Telefono,
-              NumeroDiplomado = dto.NumeroDiplomado
+                Modalidad = dto.Modalidad,
+                CorreoElectronico = dto.CorreoElectronico.Trim().ToLower(),
+                Telefono = dto.Telefono,
+                NumeroDiplomado = dto.NumeroDiplomado
             };
 
        _context.Alumnos.Add(entity);
@@ -119,26 +121,26 @@ var alumnos = await _context.Alumnos
         private void ValidateAlumno(AlumnosDTO dto)
         {
             if (string.IsNullOrWhiteSpace(dto.NombreCompleto))
-     throw new InvalidOperationException("El nombre completo es requerido.");
+                throw new InvalidOperationException("El nombre completo es requerido.");
 
- if (string.IsNullOrWhiteSpace(dto.CorreoElectronico))
-       throw new InvalidOperationException("El correo electrónico es requerido.");
+            if (string.IsNullOrWhiteSpace(dto.CorreoElectronico))
+                throw new InvalidOperationException("El correo electrónico es requerido.");
 
-     if (dto.FechaNacimiento > DateTime.Now.AddYears(-16))
-       throw new InvalidOperationException("El alumno debe tener al menos 16 años.");
+            if (dto.FechaNacimiento > DateTime.Now.AddYears(-6))
+                throw new InvalidOperationException("El alumno debe tener al menos 6 años.");
 
-        if (dto.TipoDeCurso == CursoType.None)
-    throw new InvalidOperationException("Debe seleccionar un tipo de curso válido.");
+            if (dto.TipoDeCurso == CursoType.None)
+                throw new InvalidOperationException("Debe seleccionar un tipo de curso válido.");
 
             if (dto.Modalidad == ModalidadCurso.None)
-           throw new InvalidOperationException("Debe seleccionar una modalidad válida.");
+                throw new InvalidOperationException("Debe seleccionar una modalidad válida.");
 
             // Validar número de diplomado para diplomados
-         if (dto.TipoDeCurso == CursoType.Diplomado && !dto.NumeroDiplomado.HasValue)
-          throw new InvalidOperationException("El número de diplomado es requerido para diplomados.");
+            if (dto.TipoDeCurso == CursoType.DiplomadoN4 && !dto.NumeroDiplomado.HasValue)
+                throw new InvalidOperationException("El número de diplomado es requerido para diplomados.");
 
-        // Validar que no sea necesario número de diplomado para seminarios
-            if (dto.TipoDeCurso == CursoType.Seminario && dto.NumeroDiplomado.HasValue)
+            // Validar numero para seminarios
+            if (dto.TipoDeCurso == CursoType.Seminario1 && dto.NumeroDiplomado.HasValue)
                 throw new InvalidOperationException("Los seminarios no requieren número de diplomado.");
         }
 

@@ -38,7 +38,7 @@ namespace sdv_backend.Infraestructure.API_Services
                 throw new InvalidOperationException("Uno o más alumnos seleccionados no existen.");
 
             // Validar cupo máximo
-            var maxCapacity = dto.TipoDeCurso == CursoType.Seminario ? 12 : 5;
+            var maxCapacity = GetMaxCapacity(dto.TipoDeCurso);
             if (dto.AlumnoIds.Count > maxCapacity)
                 throw new InvalidOperationException(
                     $"El cupo máximo para {dto.TipoDeCurso} es de {maxCapacity} alumnos. Se intentó registrar {dto.AlumnoIds.Count}.");
@@ -150,7 +150,7 @@ namespace sdv_backend.Infraestructure.API_Services
                 throw new InvalidOperationException("Uno o más alumnos seleccionados no existen.");
 
             // Validar cupo máximo
-            var maxCapacity = dto.TipoDeCurso == CursoType.Seminario ? 12 : 5;
+            var maxCapacity = GetMaxCapacity(dto.TipoDeCurso);
             if (dto.AlumnoIds.Count > maxCapacity)
                 throw new InvalidOperationException(
                     $"El cupo máximo para {dto.TipoDeCurso} es de {maxCapacity} alumnos. Se intentó registrar {dto.AlumnoIds.Count}.");
@@ -243,9 +243,9 @@ namespace sdv_backend.Infraestructure.API_Services
 
             var examples = new List<ClassSchedule>
             {
-                new ClassSchedule { RoomId = rooms[0].Id, TimeSlotId = timeSlots[0].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Lunes, Modalidad = ModalidadCurso.Presencial, TipoDeCurso = CursoType.Seminario, CreatedAt = DateTime.UtcNow },
-                new ClassSchedule { RoomId = rooms[Math.Min(1, rooms.Count-1)].Id, TimeSlotId = timeSlots[Math.Min(1, timeSlots.Count-1)].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Martes, Modalidad = ModalidadCurso.Presencial, TipoDeCurso = CursoType.Diplomado, CreatedAt = DateTime.UtcNow },
-                new ClassSchedule { RoomId = rooms[Math.Min(2, rooms.Count-1)].Id, TimeSlotId = timeSlots[Math.Min(0, timeSlots.Count-1)].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Jueves, Modalidad = ModalidadCurso.Virtual, TipoDeCurso = CursoType.Seminario, CreatedAt = DateTime.UtcNow },
+                new ClassSchedule { RoomId = rooms[0].Id, TimeSlotId = timeSlots[0].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Lunes, Modalidad = ModalidadCurso.Presencial, TipoDeCurso = CursoType.Seminario1, CreatedAt = DateTime.UtcNow },
+                new ClassSchedule { RoomId = rooms[Math.Min(1, rooms.Count-1)].Id, TimeSlotId = timeSlots[Math.Min(1, timeSlots.Count-1)].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Martes, Modalidad = ModalidadCurso.Presencial, TipoDeCurso = CursoType.DiplomadoN4, CreatedAt = DateTime.UtcNow },
+                new ClassSchedule { RoomId = rooms[Math.Min(2, rooms.Count-1)].Id, TimeSlotId = timeSlots[Math.Min(0, timeSlots.Count-1)].Id, MaestroId = maestro.Id, DayOfWeek = Dias.Jueves, Modalidad = ModalidadCurso.Virtual, TipoDeCurso = CursoType.Seminario1, CreatedAt = DateTime.UtcNow },
             };
 
             foreach (var cs in examples)
@@ -261,8 +261,8 @@ namespace sdv_backend.Infraestructure.API_Services
 
         private ClassScheduleOutPutDTO MapToOutputDTO(ClassSchedule cs)
         {
-            var maxCapacity = cs.TipoDeCurso == CursoType.Seminario ? 12 : 5;
-            
+            var maxCapacity = GetMaxCapacity(cs.TipoDeCurso);
+
             return new ClassScheduleOutPutDTO
             {
                 Id = cs.Id,
@@ -350,9 +350,30 @@ namespace sdv_backend.Infraestructure.API_Services
         {
             return tipo switch
             {
-                CursoType.Seminario => "Seminario",
-                CursoType.Diplomado => "Diplomado",
+                CursoType.Seminario1 => "Seminario Doblaje y Locución 1",
+                CursoType.Seminario2 => "Seminario Doblaje y Locución 2",
+                CursoType.DiplomadoN4 => "Diplomado N4",
+                CursoType.DiplomadoN5 => "Diplomado N5",
+                CursoType.InfKids1 => "Influencer Kids 1",
+                CursoType.InfKids2 => "Influencer Kids 2",
+                CursoType.ClubMasters => "Club Masters",
                 _ => "N/A"
+            };
+        }
+
+        // Método centralizado para obtener la capacidad máxima según tipo de curso.
+        private int GetMaxCapacity(CursoType tipo)
+        {
+            return tipo switch
+            {
+                CursoType.Seminario1 => 12,
+                CursoType.Seminario2 => 5,
+                CursoType.DiplomadoN4 => 5,
+                CursoType.DiplomadoN5 => 5,
+                CursoType.InfKids1 => 12,
+                CursoType.InfKids2 => 7,
+                CursoType.ClubMasters => 6,
+                _ => 5
             };
         }
     }
