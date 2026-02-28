@@ -15,12 +15,9 @@ namespace sdv_backend.Domain.OutPutDTO
 
         // Datos académicos
     public CursoType TipoDeCurso { get; set; } = CursoType.None;
-        public ModalidadCurso Modalidad { get; set; } = ModalidadCurso.None;
-        public int? NumeroDiplomado { get; set; } // Número específico del diplomado (N5, N6, etc.) - Nullable porque solo aplica para diplomados
         
         // Datos adicionales específicos para maestros
         public string Direccion { get; set; } = string.Empty;
-        public string Especialidad { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
     }
 }

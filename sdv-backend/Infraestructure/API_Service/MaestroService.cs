@@ -34,9 +34,7 @@ var entity = new Usuario
          FechaNacimiento = dto.FechaNacimiento,
      Procedencia = dto.Procedencia,
             TipoDeCurso = dto.TipoDeCurso,
- Modalidad = dto.Modalidad,
-        NumeroDiplomado = dto.NumeroDiplomado,
-   Especialidad = dto.Especialidad,
+ 
  CreatedAt = DateTime.UtcNow
         };
 
@@ -83,9 +81,7 @@ if (entity == null) return null;
       entity.FechaNacimiento = dto.FechaNacimiento;
    entity.Procedencia = dto.Procedencia;
             entity.TipoDeCurso = dto.TipoDeCurso;
-  entity.Modalidad = dto.Modalidad;
-      entity.NumeroDiplomado = dto.NumeroDiplomado;
-     entity.Especialidad = dto.Especialidad;
+  
 
             await _context.SaveChangesAsync();
 
@@ -148,16 +144,7 @@ if (entity == null) return null;
          if (dto.TipoDeCurso == CursoType.None)
        throw new InvalidOperationException("Debe seleccionar un tipo de curso válido.");
 
- if (dto.Modalidad == ModalidadCurso.None)
-     throw new InvalidOperationException("Debe seleccionar una modalidad válida.");
-
-        // Validar número de diplomado para diplomados
-            if (dto.TipoDeCurso == CursoType.DiplomadoN4 && !dto.NumeroDiplomado.HasValue)
-    throw new InvalidOperationException("El número de diplomado es requerido para diplomados.");
-
- // Validar que no sea necesario número de diplomado para seminarios
-            if (dto.TipoDeCurso == CursoType.Seminario1 && dto.NumeroDiplomado.HasValue)
-        throw new InvalidOperationException("Los seminarios no requieren número de diplomado.");
+ 
         }
 
         private async Task ValidateEmailUniqueAsync(string email, int? excludeId = null)
@@ -185,19 +172,16 @@ if (entity == null) return null;
         {
      return new MaestroOutPutDTO
     {
-       Id = usuario.Id,
-  NombreCompleto = usuario.NombreCompleto,
-    CorreoElectronico = usuario.CorreoElectronico,
-      Direccion = usuario.Direccion,
-          Telefono = usuario.Telefono,
-   FechaNacimiento = usuario.FechaNacimiento ?? DateTime.MinValue,
+        Id = usuario.Id,
+        NombreCompleto = usuario.NombreCompleto,
+        CorreoElectronico = usuario.CorreoElectronico,
+        Direccion = usuario.Direccion,
+        Telefono = usuario.Telefono,
+        FechaNacimiento = usuario.FechaNacimiento ?? DateTime.MinValue,
         Procedencia = usuario.Procedencia ?? string.Empty,
- TipoDeCurso = usuario.TipoDeCurso ?? CursoType.None,
-              Modalidad = usuario.Modalidad ?? ModalidadCurso.None,
-         NumeroDiplomado = usuario.NumeroDiplomado,
-             Especialidad = usuario.Especialidad ?? string.Empty,
-     CreatedAt = usuario.CreatedAt
-            };
+        TipoDeCurso = usuario.TipoDeCurso ?? CursoType.None,
+        CreatedAt = usuario.CreatedAt
+        };
      }
     }
 }

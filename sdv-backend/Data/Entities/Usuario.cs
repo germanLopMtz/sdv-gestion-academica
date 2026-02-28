@@ -17,9 +17,6 @@ namespace sdv_backend.Data.Entities
         public DateTime? FechaNacimiento { get; set; }
         public string? Procedencia { get; set; } = string.Empty;
         public CursoType? TipoDeCurso { get; set; } = CursoType.None;
-        public ModalidadCurso? Modalidad { get; set; } = ModalidadCurso.None;
-        public int? NumeroDiplomado { get; set; }
-        public string? Especialidad { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }

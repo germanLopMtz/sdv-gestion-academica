@@ -6,11 +6,11 @@ export interface MaestroDTO {
   correoElectronico: string;
   procedencia: string;
   tipoDeCurso: CursoType;
-  modalidad: ModalidadCurso;
+  modalidad?: ModalidadCurso;
   numeroDiplomado?: number;
   contrasena: string;
   direccion: string;
-  especialidad: string;
+  especialidad?: string;
 }
 
 export interface MaestroOutPutDTO {
@@ -21,10 +21,10 @@ export interface MaestroOutPutDTO {
   correoElectronico: string;
   procedencia: string;
   tipoDeCurso: CursoType;
-  modalidad: ModalidadCurso;
+  modalidad?: ModalidadCurso;
   numeroDiplomado?: number;
   direccion: string;
-  especialidad: string;
+  especialidad?: string;
 }
 
 // Display interface for backward compatibility
@@ -41,12 +41,10 @@ export interface Maestro {
 
 // Utility functions for mapping between API and display formats
 export const mapMaestroToDisplay = (maestro: MaestroOutPutDTO): Maestro => {
-  const getCursoName = (tipo: CursoType, numeroDiplomado?: number): string => {
+  const getCursoName = (tipo: CursoType, especialidad?: string): string => {
     switch (tipo) {
-      case CursoType.Seminario:
-        return 'Seminario de Actuación';
       case CursoType.Diplomado:
-        return `Diplomado N${numeroDiplomado || ''} - ${maestro.especialidad}`;
+        return especialidad || 'Sin especialidad';
       default:
         return 'Sin curso asignado';
     }
@@ -66,7 +64,7 @@ export const mapMaestroToDisplay = (maestro: MaestroOutPutDTO): Maestro => {
   return {
     id: maestro.id,
     nombre: maestro.nombreCompleto,
-    curso: getCursoName(maestro.tipoDeCurso, maestro.numeroDiplomado),
+    curso: getCursoName(maestro.tipoDeCurso, maestro.especialidad),
     fechaNac: maestro.fechaNacimiento,
     telefono: maestro.telefono,
     email: maestro.correoElectronico,

@@ -13,60 +13,34 @@ import {
 } from '@/components/ui/dialog';
 
 import { maestrosService } from '../services/maestrosService';
-import { MaestroOutPutDTO, Maestro, mapMaestroToDisplay, CursoType, ModalidadCurso, MaestroDTO } from '../types/maestro';
+import { MaestroOutPutDTO, Maestro, mapMaestroToDisplay, CursoType, MaestroDTO } from '../types/maestro';
 
 // Funciones de mapeo para el formulario
 const getCursoDisplayName = (tipo: CursoType, numeroDiplomado?: number, especialidad?: string): string => {
   switch (tipo) {
-    case CursoType.Seminario:
-      return 'Seminario de Actuación';
     case CursoType.Diplomado:
-      return `Diplomado N${numeroDiplomado || ''} - ${especialidad || ''}`;
+      return especialidad || 'Sin especialidad';
     default:
       return '';
   }
 };
 
 const parseCursoFromDisplay = (displayName: string): { tipo: CursoType; numeroDiplomado?: number; especialidad?: string } => {
-  if (displayName === 'Seminario de Actuación') {
-    return { tipo: CursoType.Seminario };
-  }
+  // Los nuevos cursos son: Doblaje, Locución, Influencer Kids, Actuación y Canto
+  const cursoNames = ['Doblaje', 'Locución', 'Influencer Kids', 'Actuación y Canto'];
   
-  if (displayName.includes('Diplomado')) {
-    const match = displayName.match(/Diplomado N(\d+) - (.+)/);
-    if (match) {
-      return {
-        tipo: CursoType.Diplomado,
-        numeroDiplomado: parseInt(match[1]),
-        especialidad: match[2]
-      };
-    }
+  if (cursoNames.includes(displayName)) {
+    return {
+      tipo: CursoType.Diplomado,
+      especialidad: displayName
+    };
   }
   
   return { tipo: CursoType.None };
 };
 
-const getModalidadFromString = (modalidad: string): ModalidadCurso => {
-  switch (modalidad) {
-    case 'presencial':
-      return ModalidadCurso.Presencial;
-    case 'virtual':
-      return ModalidadCurso.Virtual;
-    default:
-      return ModalidadCurso.None;
-  }
-};
 
-const getStringFromModalidad = (modalidad: ModalidadCurso): string => {
-  switch (modalidad) {
-    case ModalidadCurso.Presencial:
-      return 'presencial';
-    case ModalidadCurso.Virtual:
-      return 'virtual';
-    default:
-      return '';
-  }
-};
+
 
 interface NewMaestro {
   nombre: string;
@@ -75,9 +49,7 @@ interface NewMaestro {
   telefono: string;
   email: string;
   procedencia: string;
-  modalidad: string;
   direccion: string;
-  especialidad: string;
   contrasena: string;
 }
 
@@ -90,7 +62,6 @@ const MaestrosSection = () => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [filterValues, setFilterValues] = useState({
     curso: '',
-    modalidad: '',
     procedencia: ''
   });
   const [activeFilters, setActiveFilters] = useState<Record<string, string>>({});
@@ -101,9 +72,7 @@ const MaestrosSection = () => {
     telefono: '',
     email: '',
     procedencia: '',
-    modalidad: '',
     direccion: '',
-    especialidad: '',
     contrasena: ''
   });
 
@@ -164,7 +133,6 @@ const MaestrosSection = () => {
     setActiveFilters({});
     setFilterValues({
       curso: '',
-      modalidad: '',
       procedencia: ''
     });
   };
@@ -183,8 +151,6 @@ const MaestrosSection = () => {
       switch (key) {
         case 'curso':
           return maestro.curso === value;
-        case 'modalidad':
-          return maestro.modalidad === value;
         case 'procedencia':
           return maestro.procedencia === value;
         default:
@@ -206,9 +172,7 @@ const MaestrosSection = () => {
           telefono: maestroToEdit.telefono,
           email: maestroToEdit.email,
           procedencia: maestroToEdit.procedencia,
-          modalidad: maestroToEdit.modalidad,
           direccion: '', // Estos campos no están en el objeto display, se dejarán vacíos para edición
-          especialidad: '',
           contrasena: ''
         });
         setIsEditing(true);
@@ -220,14 +184,9 @@ const MaestrosSection = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validar que se hayan seleccionado curso y modalidad
+    // Validar que se hayan seleccionado curso
     if (!newMaestro.curso) {
       alert('Por favor seleccione un curso');
-      return;
-    }
-    
-    if (!newMaestro.modalidad) {
-      alert('Por favor seleccione una modalidad');
       return;
     }
     
@@ -248,9 +207,7 @@ const MaestrosSection = () => {
       correoElectronico: newMaestro.email,
       procedencia: newMaestro.procedencia,
       tipoDeCurso: cursoInfo.tipo,
-      modalidad: getModalidadFromString(newMaestro.modalidad),
-      numeroDiplomado: cursoInfo.numeroDiplomado,
-      especialidad: cursoInfo.especialidad || newMaestro.especialidad,
+      especialidad: cursoInfo.especialidad,
       direccion: newMaestro.direccion,
       contrasena: newMaestro.contrasena
     };
@@ -297,9 +254,7 @@ const MaestrosSection = () => {
       telefono: '',
       email: '',
       procedencia: '',
-      modalidad: '',
       direccion: '',
-      especialidad: '',
       contrasena: ''
     });
   };
@@ -504,7 +459,6 @@ const MaestrosSection = () => {
                             <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Teléfono</th>
                             <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Correo</th>
                             <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Procedencia</th>
-                            <th className="px-6 py-4 text-left text-sm font-medium text-gray-700">Modalidad</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
@@ -516,7 +470,7 @@ const MaestrosSection = () => {
                             </tr>
                           ) : filteredMaestros.length === 0 ? (
                             <tr>
-                              <td colSpan={8} className="px-6 py-4 text-center text-gray-500">
+                              <td colSpan={7} className="px-6 py-4 text-center text-gray-500">
                                 No se encontraron maestros
                               </td>
                             </tr>
@@ -553,7 +507,6 @@ const MaestrosSection = () => {
                                 <td className="px-6 py-4 text-sm text-gray-700">{maestro.telefono}</td>
                                 <td className="px-6 py-4 text-sm text-gray-700">{maestro.email}</td>
                                 <td className="px-6 py-4 text-sm text-gray-700">{maestro.procedencia}</td>
-                                <td className="px-6 py-4 text-sm text-gray-700">{maestro.modalidad}</td>
                               </tr>
                             ))
                           )}
@@ -578,37 +531,23 @@ const MaestrosSection = () => {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-6 py-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="curso-filter">Curso</Label>
-                <select
-                  id="curso-filter"
-                  name="curso"
-                  value={filterValues.curso}
-                  onChange={(e) => handleFilterChange('curso', e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">Seleccione el curso</option>
-                  <option value="Seminario de Actuación">Seminario de Actuación</option>
-                  <option value="Diplomado N4 - Expresión Oral">Diplomado N4 - Expresión Oral</option>
-                  <option value="Diplomado N5 - Doblaje">Diplomado N5 - Doblaje</option>
-                  <option value="Diplomado N6 - Locución">Diplomado N6 - Locución</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="modalidad-filter">Modalidad</Label>
-                <select
-                  id="modalidad-filter"
-                  name="modalidad"
-                  value={filterValues.modalidad}
-                  onChange={(e) => handleFilterChange('modalidad', e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <option value="">Seleccione la modalidad</option>
-                  <option value="presencial">Presencial</option>
-                  <option value="virtual">Virtual</option>
-                </select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="curso-filter">Curso</Label>
+              <select
+                id="curso-filter"
+                name="curso"
+                value={filterValues.curso}
+                onChange={(e) => handleFilterChange('curso', e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Seleccione el curso</option>
+                <option value="Doblaje">Doblaje</option>
+                <option value="Locución">Locución</option>
+                <option value="Actuación y Canto">Actuación y Canto</option>
+                <option value="Influencer Kids">Influencer Kids</option>
+
+
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="procedencia">Procedencia</Label>
@@ -672,10 +611,10 @@ const MaestrosSection = () => {
                   required
                 >
                   <option value="">Seleccione el curso</option>
-                  <option value="Seminario de Actuación">Seminario de Actuación</option>
-                  <option value="Diplomado N4 - Expresión Oral">Diplomado N4 - Expresión Oral</option>
-                  <option value="Diplomado N5 - Doblaje">Diplomado N5 - Doblaje</option>
-                  <option value="Diplomado N6 - Locución">Diplomado N6 - Locución</option>
+                  <option value="Doblaje">Doblaje</option>
+                  <option value="Locución">Locución</option>
+                  <option value="Influencer Kids">Influencer Kids</option>
+                  <option value="Actuación y Canto">Actuación y Canto</option>
                 </select>
               </div>
             </div>
@@ -718,58 +657,28 @@ const MaestrosSection = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="procedencia">Procedencia</Label>
-                <Input
-                  id="procedencia"
-                  name="procedencia"
-                  value={newMaestro.procedencia}
-                  onChange={handleInputChange}
-                  placeholder="Ej: Hermosillo, Son. MX"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="modalidad">Modalidad</Label>
-                <select
-                  id="modalidad"
-                  name="modalidad"
-                  value={newMaestro.modalidad}
-                  onChange={(e) => handleSelectChange('modalidad', e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  required
-                >
-                  <option value="">Seleccione la modalidad</option>
-                  <option value="presencial">Presencial</option>
-                  <option value="virtual">Virtual</option>
-                </select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="procedencia">Procedencia</Label>
+              <Input
+                id="procedencia"
+                name="procedencia"
+                value={newMaestro.procedencia}
+                onChange={handleInputChange}
+                placeholder="Ej: Hermosillo, Son. MX"
+                required
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="direccion">Dirección</Label>
-                <Input
-                  id="direccion"
-                  name="direccion"
-                  value={newMaestro.direccion}
-                  onChange={handleInputChange}
-                  placeholder="Ej: Calle 123, Col. Centro"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="especialidad">Especialidad</Label>
-                <Input
-                  id="especialidad"
-                  name="especialidad"
-                  value={newMaestro.especialidad}
-                  onChange={handleInputChange}
-                  placeholder="Ej: Doblaje, Locución, etc."
-                  required
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="direccion">Dirección</Label>
+              <Input
+                id="direccion"
+                name="direccion"
+                value={newMaestro.direccion}
+                onChange={handleInputChange}
+                placeholder="Ej: Calle 123, Col. Centro"
+                required
+              />
             </div>
 
             <div className="space-y-2">
