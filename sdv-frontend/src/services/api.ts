@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
     }
 );
 
-// Usuarios
+
 export const usuariosApi = {
     create: <T = unknown>(data: unknown): Promise<AxiosResponse<T>> =>
         apiClient.post<T>("/Usuarios", data),
@@ -50,7 +50,7 @@ export const usuariosApi = {
         apiClient.post<T>("/Usuarios/login", credentials),
 };
 
-// Alumnos
+
 export const alumnosApi = {
     create: <T = unknown>(data: unknown): Promise<AxiosResponse<T>> =>
         apiClient.post<T>("/Alumnos", data),
@@ -64,7 +64,7 @@ export const alumnosApi = {
         apiClient.delete<T>(`/Alumnos/${id}`),
 };
 
-// Horarios
+
 export const horariosApi = {
     create: <T = unknown>(data: unknown): Promise<AxiosResponse<T>> =>
         apiClient.post<T>("/Schedule", data),
@@ -82,6 +82,29 @@ export const horariosApi = {
         apiClient.get<T>("/Schedule/timeslots"),
     seed: <T = unknown>(): Promise<AxiosResponse<T>> =>
         apiClient.post<T>("/Schedule/seed", {}),
+};
+
+export const mensualidadApi = {
+    create: <T = unknown>(data: unknown): Promise<AxiosResponse<T>> =>
+        apiClient.post<T>("/Mensualidad", data),
+    getAll: <T = unknown>(): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>("/Mensualidad"),
+    getCatalogos: <T = unknown>(): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>("/Mensualidad/catalogos"),
+    getById: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/Mensualidad/${id}`),
+    update: <T = unknown>(id: number, data: unknown): Promise<AxiosResponse<T>> =>
+        apiClient.put<T>(`/Mensualidad/${id}`, data),
+    remove: <T = unknown>(id: number): Promise<AxiosResponse<T>> =>
+        apiClient.delete<T>(`/Mensualidad/${id}`),
+    getByAlumno: <T = unknown>(alumnoId: number): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/Mensualidad/alumno/${alumnoId}`),
+    getResumen: <T = unknown>(): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>("/Mensualidad/resumen"),
+    getByMes: <T = unknown>(mes: string): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/Mensualidad/mes/${mes}`),
+    getByEstado: <T = unknown>(estado: string): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/Mensualidad/estado/${estado}`),
 };
 
 export type { AxiosResponse };

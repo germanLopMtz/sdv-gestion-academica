@@ -16,6 +16,7 @@ namespace sdv_backend.Data.DataDB
         public DbSet<TimeSlot> TimeSlots => Set<TimeSlot>();
         public DbSet<ClassSchedule> ClassSchedules => Set<ClassSchedule>();
         public DbSet<ClassStudent> ClassStudents => Set<ClassStudent>();
+        public DbSet<Mensualidad> Mensualidades => Set<Mensualidad>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -51,6 +52,17 @@ namespace sdv_backend.Data.DataDB
                 .WithMany()
                 .HasForeignKey(cs => cs.AlumnoId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Configuración de Mensualidad
+            modelBuilder.Entity<Mensualidad>()
+                .HasOne(m => m.Alumno)
+                .WithMany()
+                .HasForeignKey(m => m.AlumnoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Mensualidad>()
+                .Property(m => m.Monto)
+                .HasPrecision(18, 2);
 
             // Índice único para prevenir choques de maestro/aula en mismo horario y día
             modelBuilder.Entity<ClassSchedule>()
