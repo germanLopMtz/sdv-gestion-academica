@@ -1,0 +1,16 @@
+- name: Introduccion
+  href: intro.md
+- name: Guia de inicio
+  href: getting-started.md
+- name: Arquitectura
+  href: architecture.md
+- name: Modulos del sistema
+  items:
+  - name: Mensualidades
+    href: mensualidades.md
+  - name: Alumnos
+    href: alumnos.md
+  - name: Maestros
+    href: maestros.md
+  - name: Horarios
+    href: horarios.md

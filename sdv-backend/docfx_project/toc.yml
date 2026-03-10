@@ -1,0 +1,9 @@
+- name: Inicio
+  href: index.md
+- name: Articulos
+  href: articles/
+  homepage: articles/intro.md
+- name: API Reference
+  href: api/
+- name: GitHub
+  href: https://github.com/germanLopMtz/sdv-gestion-academica

@@ -1,0 +1,82 @@
+@echo off
+chcp 65001 >nul
+echo ????????????????????????????????????????
+echo    ?? Documentación SDV - Acceso Rápido
+echo ????????????????????????????????????????
+echo.
+echo Selecciona una opción:
+echo.
+echo [1] ?? Abrir Documentación (si ya está generada)
+echo [2] ? Generar RÁPIDO (sin compilar proyecto)
+echo [3] ?? Generar COMPLETO (compila el proyecto)
+echo [4] ?? Abrir Swagger API
+echo [5] ?? Ver todas las URLs
+echo [6] ? Salir
+echo.
+set /p option="Opción: "
+
+if "%option%"=="1" goto abrir
+if "%option%"=="2" goto rapido
+if "%option%"=="3" goto completo
+if "%option%"=="4" goto swagger
+if "%option%"=="5" goto urls
+if "%option%"=="6" goto fin
+
+:abrir
+echo.
+echo ?? Abriendo documentación en http://localhost:9090...
+start http://localhost:9090
+echo.
+echo ??  Si no se abre, ejecuta primero la opción 2 o 3
+pause
+goto fin
+
+:rapido
+echo.
+echo ? Generando documentación RÁPIDO (sin compilar)...
+echo    Esto funciona incluso si Visual Studio está abierto
+echo.
+powershell.exe -NoExit -ExecutionPolicy Bypass -File ".\quick-docs.ps1"
+goto fin
+
+:completo
+echo.
+echo ?? Generando documentación COMPLETO...
+echo    ??  Asegúrate de cerrar Visual Studio primero
+echo.
+pause
+powershell.exe -NoExit -ExecutionPolicy Bypass -File ".\generate-docs.ps1"
+goto fin
+
+:swagger
+echo.
+echo ?? Abriendo Swagger API...
+start https://localhost:5001/swagger
+echo.
+echo ??  Asegúrate de que el backend esté ejecutándose:
+echo    cd sdv-backend
+echo    dotnet run
+pause
+goto fin
+
+:urls
+echo.
+echo ????????????????????????????????????????
+echo    ?? URLs del Proyecto
+echo ????????????????????????????????????????
+echo.
+echo ?? Documentación:    http://localhost:9090
+echo ?? Swagger API:      https://localhost:5001/swagger
+echo ?? Backend API:      https://localhost:5001
+echo ?? Frontend:         http://localhost:8080
+echo.
+echo Para acceder rápido desde el navegador:
+echo - Backend:  https://localhost:5001/docs
+echo.
+pause
+goto fin
+
+:fin
+echo.
+echo ?? ¡Hasta luego!
+exit

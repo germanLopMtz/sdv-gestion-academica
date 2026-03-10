@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using sdv_backend.Infraestructure;
 using sdv_backend.Infraestructure.API_Service_Interfaces;
 using sdv_backend.Infraestructure.API_Services;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +13,28 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "SDV Backend API",
+        Version = "v1",
+        Description = "API para el Sistema de Gestión Académica SDV",
+        Contact = new OpenApiContact
+        {
+            Name = "Equipo SDV",
+            Url = new Uri("https://github.com/germanLopMtz/sdv-gestion-academica")
+        }
+    });
+
+    // Incluir comentarios XML en Swagger
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+});
 
 
 builder.Services.AddDbContext<AppDBContext>(options =>
@@ -59,6 +82,27 @@ app.UseCors("FrontendPolicy");
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Endpoint de acceso rápido a la documentación
+app.MapGet("/docs", () => Results.Redirect("http://localhost:9090"))
+    .WithName("OpenDocumentation");
+
+// Endpoint para verificar si la documentación está disponible
+app.MapGet("/docs/status", () => 
+{
+    var docPath = Path.Combine(Directory.GetCurrentDirectory(), "..", "docfx_project", "_site", "index.html");
+    var exists = File.Exists(docPath);
+    return Results.Ok(new 
+    { 
+        documentationGenerated = exists,
+        url = "http://localhost:9090",
+        message = exists 
+            ? "Documentación generada. Ejecuta 'docfx serve' para verla." 
+            : "Documentación no generada. Ejecuta '.\\generate-docs.ps1' primero."
+    });
+})
+.WithName("CheckDocumentation")
+;
 
 // Seeding de Aulas y Horarios PM si no existen
 using (var scope = app.Services.CreateScope())
