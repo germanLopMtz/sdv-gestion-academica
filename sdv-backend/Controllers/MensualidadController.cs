@@ -43,15 +43,16 @@ namespace sdv_backend.Controllers
         {
             try
             {
-    var mensualidad = await _mensualidadService.GetByIdAsync(id);
-   if (mensualidad == null)
-         return NotFound(new { message = "Mensualidad no encontrada." });
-
-   return Ok(mensualidad);
+                var mensualidad = await _mensualidadService.GetByIdAsync(id);
+                if (mensualidad == null)
+                {
+                    return NotFound(new { message = "Mensualidad no encontrada." });
+                }
+                return Ok(mensualidad);
             }
-      catch (Exception ex)
-        {
-       return BadRequest(new { message = ex.Message });
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
   }
 
@@ -84,12 +85,13 @@ namespace sdv_backend.Controllers
         {
             try
             {
-     var mensualidad = await _mensualidadService.UpdateAsync(id, dto);
-         if (mensualidad == null)
-      return NotFound(new { message = "Mensualidad no encontrada." });
-
-  return Ok(mensualidad);
-         }
+                var mensualidad = await _mensualidadService.UpdateAsync(id, dto);
+                if (mensualidad == null)
+                {
+                    return NotFound(new { message = "Mensualidad no encontrada." });
+                }
+                return Ok(mensualidad);
+            }
  catch (InvalidOperationException ex)
             {
         return BadRequest(new { message = ex.Message });
@@ -108,11 +110,12 @@ namespace sdv_backend.Controllers
         {
   try
             {
-    var deleted = await _mensualidadService.DeleteAsync(id);
-    if (!deleted)
-  return NotFound(new { message = "Mensualidad no encontrada." });
-
-         return Ok(new { message = "Mensualidad eliminada exitosamente." });
+                var deleted = await _mensualidadService.DeleteAsync(id);
+                if (!deleted)
+                {
+                    return NotFound(new { message = "Mensualidad no encontrada." });
+                }
+                return Ok(new { message = "Mensualidad eliminada exitosamente." });
             }
   catch (Exception ex)
  {

@@ -41,7 +41,10 @@ namespace sdv_backend.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _scheduleService.GetByIdAsync(id);
-            if (result == null) return NotFound();
+            if (result == null)
+            {
+                return NotFound();
+            }
             return Ok(result);
         }
 
@@ -59,7 +62,10 @@ namespace sdv_backend.Controllers
             {
                 // TODO: Validar que el usuario es Admin (cuando se implemente autenticación/autorización)
                 var result = await _scheduleService.UpdateAsync(id, dto);
-                if (result == null) return NotFound();
+                if (result == null)
+                {
+                    return NotFound();
+                }
                 return Ok(result);
             }
             catch (InvalidOperationException ex)
@@ -79,7 +85,10 @@ namespace sdv_backend.Controllers
             {
                 // TODO: Validar que el usuario es Admin (cuando se implemente autenticación/autorización)
                 var success = await _scheduleService.DeleteAsync(id);
-                if (!success) return NotFound();
+                if (!success)
+                {
+                    return NotFound();
+                }
                 return Ok();
             }
             catch (Exception ex)

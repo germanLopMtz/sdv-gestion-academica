@@ -109,22 +109,22 @@ using (var scope = app.Services.CreateScope())
 {
     var ctx = scope.ServiceProvider.GetRequiredService<AppDBContext>();
     // Aulas fijas
-    if (!ctx.Rooms.Any())
+    if (!await ctx.Rooms.AnyAsync())
     {
         ctx.Rooms.AddRange(new sdv_backend.Data.Entities.Room { Name = "Control Room 1" },
                            new sdv_backend.Data.Entities.Room { Name = "Control Room 2" },
                            new sdv_backend.Data.Entities.Room { Name = "Control Room 3" },
                            new sdv_backend.Data.Entities.Room { Name = "Maxiplaza" });
-        ctx.SaveChanges();
+        await ctx.SaveChangesAsync();
     }
 
     // Horarios PM fijos
-    if (!ctx.TimeSlots.Any())
+    if (!await ctx.TimeSlots.AnyAsync())
     {
         ctx.TimeSlots.AddRange(new sdv_backend.Data.Entities.TimeSlot { StartTime = "15:00", EndTime = "17:00", DisplayName = "3:00-5:00 PM" },
                                new sdv_backend.Data.Entities.TimeSlot { StartTime = "17:30", EndTime = "19:30", DisplayName = "5:30-7:30 PM" },
                                new sdv_backend.Data.Entities.TimeSlot { StartTime = "20:00", EndTime = "22:00", DisplayName = "8:00-10:00 PM" });
-        ctx.SaveChanges();
+        await ctx.SaveChangesAsync();
     }
 }
 

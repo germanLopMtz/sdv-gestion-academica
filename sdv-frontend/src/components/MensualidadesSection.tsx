@@ -207,15 +207,10 @@ const MensualidadesSection = () => {
         alumnosApi.getAll<any>().catch(() => ({ data: [] })),
         (async () => {
           try {
-            const res = await mensualidadApi.getResumen<any>();
+            const res = await mensualidadApi.getAll<any>();
             return res.data;
           } catch {
-            try {
-              const res = await mensualidadApi.getAll<any>();
-              return res.data;
-            } catch {
-              return [];
-            }
+            return [];
           }
         })()
       ]);

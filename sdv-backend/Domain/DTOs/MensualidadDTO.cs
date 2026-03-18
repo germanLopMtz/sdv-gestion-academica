@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 namespace sdv_backend.Domain.DTOs
 {
     /// <summary>
@@ -7,20 +10,23 @@ namespace sdv_backend.Domain.DTOs
     {
         /// <summary>
         /// ID del alumno que realiza el pago
- /// </summary>
+        /// </summary>
+        [JsonRequired]
         public int AlumnoId { get; set; }
         
-  /// <summary>
+        /// <summary>
         /// Fecha en que se realizó el pago
         /// </summary>
+        [JsonRequired]
         public DateTime FechaPago { get; set; }
         
         /// <summary>
-   /// Monto del pago en pesos
-  /// </summary>
+        /// Monto del pago en pesos
+        /// </summary>
+        [JsonRequired]
         public decimal Monto { get; set; }
         
-   /// <summary>
+        /// <summary>
     /// Concepto del pago (Inscripción, Mensualidad, Material, Otro)
 /// </summary>
   public string Concepto { get; set; } = string.Empty;

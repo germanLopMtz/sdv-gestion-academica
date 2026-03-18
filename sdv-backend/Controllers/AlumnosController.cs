@@ -37,8 +37,9 @@ namespace sdv_backend.Controllers
             {
                 var alumno = await _alumnoService.GetByIdAsync(id);
                 if (alumno == null)
+                {
                     return NotFound(new { message = "Alumno no encontrado." });
-
+                }
                 return Ok(alumno);
             }
             catch (Exception ex)
@@ -72,8 +73,9 @@ namespace sdv_backend.Controllers
             {
                 var alumno = await _alumnoService.UpdateAsync(id, dto);
                 if (alumno == null)
+                {
                     return NotFound(new { message = "Alumno no encontrado." });
-
+                }
                 return Ok(alumno);
             }
             catch (InvalidOperationException ex)
@@ -93,8 +95,9 @@ namespace sdv_backend.Controllers
             {
                 var deleted = await _alumnoService.DeleteAsync(id);
                 if (!deleted)
+                {
                     return NotFound(new { message = "Alumno no encontrado." });
-
+                }
                 return Ok(new { message = "Alumno eliminado exitosamente." });
             }
             catch (InvalidOperationException ex)
