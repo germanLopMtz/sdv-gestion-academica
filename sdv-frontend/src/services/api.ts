@@ -84,6 +84,17 @@ export const horariosApi = {
         apiClient.post<T>("/Schedule/seed", {}),
 };
 
+export const asistenciaApi = {
+    getAlumnosByClase: <T = unknown>(claseId: number): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/asistencia/clase/${claseId}/alumnos`),
+    registrar: <T = unknown>(data: unknown): Promise<AxiosResponse<T>> =>
+        apiClient.post<T>('/asistencia', data),
+    getByFecha: <T = unknown>(claseId: number, fecha: string): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/asistencia/clase/${claseId}/fecha/${fecha}`),
+    getHistorial: <T = unknown>(claseId: number): Promise<AxiosResponse<T>> =>
+        apiClient.get<T>(`/asistencia/clase/${claseId}/historial`),
+};
+
 export const mensualidadApi = {
     create: <T = unknown>(data: unknown): Promise<AxiosResponse<T>> =>
         apiClient.post<T>("/Mensualidad", data),

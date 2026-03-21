@@ -21,4 +21,13 @@ namespace sdv_backend.Domain.OutPutDTO
         public string Nombre { get; set; } = string.Empty;
         public string Asistencia { get; set; } = string.Empty;  // "S", "N", "J", or null
     }
+
+    public class HistorialAsistenciaDTO
+    {
+        public DateTime Fecha { get; set; }
+        public int AlumnoId { get; set; }
+        public string NombreAlumno { get; set; } = string.Empty;
+        public string Estado { get; set; } = string.Empty; // "Sí asistió", "No asistió", "Justificado"
+        public string EstadoCodigo { get; set; } = string.Empty; // "S", "N", "J"
+    }
 }

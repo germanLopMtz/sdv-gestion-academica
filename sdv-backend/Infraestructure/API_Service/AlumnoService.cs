@@ -7,8 +7,6 @@ using sdv_backend.Domain.OutPutDTO;
 using Microsoft.EntityFrameworkCore;
 using sdv_backend.Infraestructure.API_Service_Interfaces;
 
-
-
 namespace sdv_backend.Infraestructure.API_Services
 {
     public class AlumnoService : IAlumnoService
@@ -17,13 +15,13 @@ namespace sdv_backend.Infraestructure.API_Services
 
         public AlumnoService(AppDBContext context)
         {
-     _context = context;
+            _context = context;
         }
 
-     public async Task<AlumnoOutPutDTO> CreateAsync(AlumnosDTO dto)
+        public async Task<AlumnoOutPutDTO> CreateAsync(AlumnosDTO dto)
         {
-  // Validaciones
-    ValidateAlumno(dto);
+            // Validaciones
+            ValidateAlumno(dto);
             await ValidateEmailUniqueAsync(dto.CorreoElectronico);
 
             var entity = new Alumno
@@ -38,7 +36,7 @@ namespace sdv_backend.Infraestructure.API_Services
                 NumeroDiplomado = dto.NumeroDiplomado
             };
 
-       _context.Alumnos.Add(entity);
+            _context.Alumnos.Add(entity);
             await _context.SaveChangesAsync();
 
             return MapToOutputDTO(entity);
@@ -52,73 +50,73 @@ namespace sdv_backend.Infraestructure.API_Services
 
         public async Task<List<AlumnoOutPutDTO>> GetAllAsync()
         {
-          var alumnos = await _context.Alumnos
-        .OrderBy(a => a.NombreCompleto)
-      .ToListAsync();
+            var alumnos = await _context.Alumnos
+                .OrderBy(a => a.NombreCompleto)
+                .ToListAsync();
 
             return alumnos.Select(MapToOutputDTO).ToList();
         }
 
         public async Task<AlumnoOutPutDTO?> UpdateAsync(int id, AlumnosDTO dto)
- {
+        {
             var entity = await _context.Alumnos.FindAsync(id);
             if (entity == null) return null;
 
-// Validaciones
-    ValidateAlumno(dto);
+            // Validaciones
+            ValidateAlumno(dto);
             await ValidateEmailUniqueAsync(dto.CorreoElectronico, id);
 
-     entity.NombreCompleto = dto.NombreCompleto;
-        entity.CorreoElectronico = dto.CorreoElectronico.Trim().ToLower();
-   entity.TipoDeCurso = dto.TipoDeCurso;
-        entity.Modalidad = dto.Modalidad;
-      entity.Procedencia = dto.Procedencia;
-    entity.Telefono = dto.Telefono;
-   entity.FechaNacimiento = dto.FechaNacimiento;
+            entity.NombreCompleto = dto.NombreCompleto;
+            entity.CorreoElectronico = dto.CorreoElectronico.Trim().ToLower();
+            entity.TipoDeCurso = dto.TipoDeCurso;
+            entity.Modalidad = dto.Modalidad;
+            entity.Procedencia = dto.Procedencia;
+            entity.Telefono = dto.Telefono;
+            entity.FechaNacimiento = dto.FechaNacimiento;
             entity.NumeroDiplomado = dto.NumeroDiplomado;
 
-        await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync();
 
-          return MapToOutputDTO(entity);
+            return MapToOutputDTO(entity);
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-  var entity = await _context.Alumnos.FindAsync(id);
-   if (entity == null) return false;
+            var entity = await _context.Alumnos.FindAsync(id);
+            if (entity == null) return false;
 
-      // Verificar si el alumno está inscrito en clases
+            // Verificar si el alumno está inscrito en clases
             var hasEnrolledClasses = await _context.ClassStudents
-         .AnyAsync(cs => cs.AlumnoId == id);
+                .AnyAsync(cs => cs.AlumnoId == id);
 
             if (hasEnrolledClasses)
- throw new InvalidOperationException("No se puede eliminar el alumno porque está inscrito en clases.");
+                throw new InvalidOperationException("No se puede eliminar el alumno porque está inscrito en clases.");
 
-   _context.Alumnos.Remove(entity);
-   await _context.SaveChangesAsync();
-    return true;
-    }
+            _context.Alumnos.Remove(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
 
         public async Task<List<AlumnoOutPutDTO>> GetAvailableAlumnosAsync()
         {
-var alumnos = await _context.Alumnos
-    .OrderBy(a => a.NombreCompleto)
-     .ToListAsync();
+            var alumnos = await _context.Alumnos
+                .OrderBy(a => a.NombreCompleto)
+                .ToListAsync();
 
-     return alumnos.Select(MapToOutputDTO).ToList();
+            return alumnos.Select(MapToOutputDTO).ToList();
         }
 
         public async Task<List<AlumnoOutPutDTO>> GetAlumnosByTipoAsync(CursoType tipo)
         {
             var alumnos = await _context.Alumnos
                 .Where(a => a.TipoDeCurso == tipo)
-  .OrderBy(a => a.NombreCompleto)
-.ToListAsync();
+                .OrderBy(a => a.NombreCompleto)
+                .ToListAsync();
 
             return alumnos.Select(MapToOutputDTO).ToList();
         }
 
-        private void ValidateAlumno(AlumnosDTO dto)
+        private static void ValidateAlumno(AlumnosDTO dto)
         {
             if (string.IsNullOrWhiteSpace(dto.NombreCompleto))
                 throw new InvalidOperationException("El nombre completo es requerido.");
@@ -146,39 +144,39 @@ var alumnos = await _context.Alumnos
 
         private async Task ValidateEmailUniqueAsync(string email, int? excludeId = null)
         {
-    var normalizedEmail = email.Trim().ToLower();
-            
-      // Verificar en alumnos
-      var queryAlumnos = _context.Alumnos.Where(a => a.CorreoElectronico == normalizedEmail);
+            var normalizedEmail = email.Trim().ToLower();
+
+            // Verificar en alumnos
+            var queryAlumnos = _context.Alumnos.Where(a => a.CorreoElectronico == normalizedEmail);
             if (excludeId.HasValue)
-     queryAlumnos = queryAlumnos.Where(a => a.Id != excludeId.Value);
+                queryAlumnos = queryAlumnos.Where(a => a.Id != excludeId.Value);
 
-         if (await queryAlumnos.AnyAsync())
-    throw new InvalidOperationException("Ya existe un alumno con este correo electrónico.");
+            if (await queryAlumnos.AnyAsync())
+                throw new InvalidOperationException("Ya existe un alumno con este correo electrónico.");
 
-      // También verificar que no exista en usuarios
+            // También verificar que no exista en usuarios
             var existsInUsuarios = await _context.Usuarios
-  .Where(u => u.CorreoElectronico == normalizedEmail)
-   .AnyAsync();
+                .Where(u => u.CorreoElectronico == normalizedEmail)
+                .AnyAsync();
 
             if (existsInUsuarios)
-         throw new InvalidOperationException("Ya existe un usuario con este correo electrónico.");
-    }
+                throw new InvalidOperationException("Ya existe un usuario con este correo electrónico.");
+        }
 
-     private AlumnoOutPutDTO MapToOutputDTO(Alumno alumno)
+        private static AlumnoOutPutDTO MapToOutputDTO(Alumno alumno)
         {
-        return new AlumnoOutPutDTO
+            return new AlumnoOutPutDTO
             {
-      Id = alumno.Id,
-       NombreCompleto = alumno.NombreCompleto,
-        TipoDeCurso = alumno.TipoDeCurso,
-      FechaNacimiento = alumno.FechaNacimiento,
-          Procedencia = alumno.Procedencia,
- Modalidad = alumno.Modalidad,
-    CorreoElectronico = alumno.CorreoElectronico,
-         Telefono = alumno.Telefono,
-         NumeroDiplomado = alumno.NumeroDiplomado
-     };
+                Id = alumno.Id,
+                NombreCompleto = alumno.NombreCompleto,
+                TipoDeCurso = alumno.TipoDeCurso,
+                FechaNacimiento = alumno.FechaNacimiento,
+                Procedencia = alumno.Procedencia,
+                Modalidad = alumno.Modalidad,
+                CorreoElectronico = alumno.CorreoElectronico,
+                Telefono = alumno.Telefono,
+                NumeroDiplomado = alumno.NumeroDiplomado
+            };
         }
     }
 }

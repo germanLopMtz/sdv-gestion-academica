@@ -1,4 +1,4 @@
-// services/maestrosService.ts
+﻿// services/maestrosService.ts
 import { MaestroDTO } from '../types/maestro';
 
 const API_BASE = '/api/maestros';
@@ -35,7 +35,7 @@ export const maestrosService = {
   getById: (id: number) => fetch(`${API_BASE}/${id}`).then(handleResponse),
   
   create: (maestro: MaestroDTO) => {
-    console.log('🚀 Enviando maestro al backend:', maestro);
+    console.log('Enviando maestro al backend:', maestro);
     return fetch(API_BASE, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

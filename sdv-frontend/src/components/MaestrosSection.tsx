@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -212,32 +212,32 @@ const MaestrosSection = () => {
       contrasena: newMaestro.contrasena
     };
 
-    console.log('📤 Datos que se envían al backend:', maestroData);
-    console.log('📤 Curso info parsed:', cursoInfo);
+    console.log('Datos que se envían al backend:', maestroData);
+    console.log('Curso info parsed:', cursoInfo);
 
     try {
       if (isEditing && selectedMaestros.length > 0) {
         // Actualizar maestro existente
         const result = await maestrosService.update(selectedMaestros[0], maestroData);
-        console.log('✅ Maestro actualizado exitosamente:', result);
+        console.log('Maestro actualizado exitosamente:', result);
       } else {
         // Crear nuevo maestro
         const result = await maestrosService.create(maestroData);
-        console.log('✅ Maestro creado exitosamente:', result);
+        console.log('Maestro creado exitosamente:', result);
       }
       
       // Recargar la lista después de la operación
       await loadMaestros();
       
     } catch (error: any) {
-      console.error('❌ Error al guardar maestro:', error);
+      console.error('Error al guardar maestro:', error);
       
       // Intentar obtener más detalles del error
       if (error.response) {
-        console.error('❌ Response status:', error.response.status);
-        console.error('❌ Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
       } else if (error.message) {
-        console.error('❌ Error message:', error.message);
+        console.error('Error message:', error.message);
       }
       
       // Mostrar error al usuario

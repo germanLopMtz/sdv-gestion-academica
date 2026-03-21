@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -60,7 +60,7 @@ const AlumnosSection = () => {
   // Debug: monitorear cambios en newStudent
   useEffect(() => {
     if (isEditing) {
-      console.log('🔄 ESTADO newStudent ACTUALIZADO:', newStudent);
+      console.log('ESTADO newStudent ACTUALIZADO:', newStudent);
     }
   }, [newStudent, isEditing]);
 
@@ -103,10 +103,10 @@ const AlumnosSection = () => {
   const handleStudentSelect = (id: number, isSelected: boolean) => {
     if (isSelected) {
       setSelectedStudents(prev => [...prev, id]);
-      console.log('✅ Alumno seleccionado ID:', id);
+      console.log('Alumno seleccionado ID:', id);
     } else {
       setSelectedStudents(prev => prev.filter(studentId => studentId !== id));
-      console.log('❌ Alumno deseleccionado ID:', id);
+      console.log('Alumno deseleccionado ID:', id);
     }
   };
 
@@ -120,8 +120,8 @@ const AlumnosSection = () => {
 
   const handleSubmit = async () => {
     if (isEditing && selectedStudents.length > 0) {
-      console.log('🔄 INICIANDO ACTUALIZACIÓN...');
-      console.log('📝 Datos del formulario:', newStudent);
+      console.log('INICIANDO ACTUALIZACION...');
+      console.log('Datos del formulario:', newStudent);
       
       // Mapear los datos del frontend al formato del backend
       const studentToUpdate = {
@@ -139,22 +139,22 @@ const AlumnosSection = () => {
         curso: newStudent.curso
       };
       
-      console.log('📤 Datos a enviar al backend:', studentToUpdate);
+      console.log('Datos a enviar al backend:', studentToUpdate);
       
       try {
         const id = selectedStudents[0];
         const updateRes = await alumnosApi.update(id, studentToUpdate);
-        console.log('✅ Alumno actualizado exitosamente:', updateRes.data);
+        console.log('Alumno actualizado exitosamente:', updateRes.data);
         
         // Refrescar la lista de alumnos
         try {
           const res = await alumnosApi.getAll<any[]>();
           if (res.data && Array.isArray(res.data) && res.data.length > 0) {
             setAlumnos(res.data);
-            console.log('📋 Lista de alumnos actualizada');
+            console.log('Lista de alumnos actualizada');
           }
         } catch (getAllError) {
-          console.error('⚠️ Error al obtener lista actualizada:', getAllError);
+          console.error('Error al obtener lista actualizada:', getAllError);
         }
         
         // Cerrar modal y limpiar
@@ -173,7 +173,7 @@ const AlumnosSection = () => {
           modalidad: 'presencial'
         });
       } catch (e) {
-        console.error('❌ Error al actualizar alumno:', e);
+        console.error('Error al actualizar alumno:', e);
         alert('Error al actualizar el alumno. Por favor intenta de nuevo.');
       }
     } else {
@@ -195,11 +195,11 @@ const AlumnosSection = () => {
           : null,
       };
       
-      console.log('📤 Payload para crear alumno:', payload);
+      console.log('Payload para crear alumno:', payload);
       
       try {
         const createRes = await alumnosApi.create(payload);
-        console.log('✅ Alumno creado exitosamente:', createRes.data);
+        console.log('Alumno creado exitosamente:', createRes.data);
         
         // Intentar obtener la lista actualizada
         try {
@@ -241,10 +241,10 @@ const AlumnosSection = () => {
       setIsLoadingEdit(true);
       
       const studentId = selectedStudents[0];
-      console.log('🚀 INICIANDO EDICIÓN - Alumno ID:', studentId);
+      console.log('INICIANDO EDICIÓN - Alumno ID:', studentId);
       
       try {
-        console.log('📡 Intentando obtener datos del backend...');
+        console.log('Intentando obtener datos del backend...');
         const response = await alumnosApi.getById(studentId);
         
         if (!response || !response.data) {
@@ -252,37 +252,37 @@ const AlumnosSection = () => {
         }
         
         const student = response.data as any;
-        console.log('✅ DATOS OBTENIDOS DEL BACKEND:', student);
-        console.log('📋 Propiedades disponibles:', Object.keys(student));
+        console.log('DATOS OBTENIDOS DEL BACKEND:', student);
+        console.log('Propiedades disponibles:', Object.keys(student));
         
         // Debug de cada campo individualmente (usando nombres correctos)
-        console.log('🔍 Campos específicos:');
-        console.log('  - nombreCompleto:', student.nombreCompleto);
-        console.log('  - tipoDeCurso:', student.tipoDeCurso);
-        console.log('  - modalidad:', student.modalidad);
-        console.log('  - fechaNacimiento:', student.fechaNacimiento);
-        console.log('  - telefono:', student.telefono);
-        console.log('  - correoElectronico:', student.correoElectronico);
-        console.log('  - procedencia:', student.procedencia);
-        console.log('  - curso:', student.curso);
-        console.log('  - numeroDiplomado:', student.numeroDiplomado);
-        console.log('  - diplomadoNumero:', student.diplomadoNumero);
-        console.log('  - numeroD:', student.numeroD);
+        console.log('Campos específicos:');
+        console.log('- nombreCompleto:', student.nombreCompleto);
+        console.log('- tipoDeCurso:', student.tipoDeCurso);
+        console.log('- modalidad:', student.modalidad);
+        console.log('- fechaNacimiento:', student.fechaNacimiento);
+        console.log('- telefono:', student.telefono);
+        console.log('- correoElectronico:', student.correoElectronico);
+        console.log('- procedencia:', student.procedencia);
+        console.log('- curso:', student.curso);
+        console.log('- numeroDiplomado:', student.numeroDiplomado);
+        console.log('- diplomadoNumero:', student.diplomadoNumero);
+        console.log('- numeroD:', student.numeroD);
         
         // Mapear tipoDeCurso (número) a texto
         const tipoCurso = String(student.tipoDeCurso || 1);
-        console.log('🎯 TipoCurso mapeado:', tipoCurso, 'desde valor:', student.tipoDeCurso);
+        console.log('TipoCurso mapeado:', tipoCurso, 'desde valor:', student.tipoDeCurso);
         
         // Mapear modalidad (número) a texto
         const modalidad = student.modalidad === 2 ? 'virtual' : 'presencial';
-        console.log('🎯 Modalidad mapeada:', modalidad);
+        console.log('Modalidad mapeada:', modalidad);
         
         // Formatear fecha de YYYY-MM-DDTHH:mm:ss a YYYY-MM-DD
         let fechaNac = '';
         if (student.fechaNacimiento) {
           const date = new Date(student.fechaNacimiento);
           fechaNac = date.toISOString().split('T')[0];
-          console.log('🎯 Fecha mapeada:', fechaNac);
+          console.log('Fecha mapeada:', fechaNac);
         }
         
         // Extraer número de diplomado del backend
@@ -295,7 +295,7 @@ const AlumnosSection = () => {
                            student.numero ||
                            '';
         }
-        console.log('🎯 Número diplomado del backend:', numeroDiplomado);
+        console.log('Numero diplomado del backend:', numeroDiplomado);
         
         const cursoLabel = cursoTypeToLabel[parseInt(tipoCurso)] || '';
         const formData = {
@@ -310,7 +310,7 @@ const AlumnosSection = () => {
           modalidad: modalidad
         };
         
-        console.log('🎯 DATOS FINALES PARA EL FORMULARIO:', formData);
+        console.log('DATOS FINALES PARA EL FORMULARIO:', formData);
         
         // Cargar datos mapeados correctamente en el formulario
         setNewStudent(formData);
@@ -319,14 +319,14 @@ const AlumnosSection = () => {
         setIsModalOpen(true);
         
       } catch (error) {
-        console.error('❌ ERROR AL OBTENER DATOS DEL BACKEND:', error);
-        console.log('🔄 Intentando fallback con datos locales...');
+        console.error('ERROR AL OBTENER DATOS DEL BACKEND:', error);
+        console.log('Intentando fallback con datos locales...');
         
         // Fallback a datos locales con el mismo mapeo
         const student = alumnos.find(a => a.Id === selectedStudents[0]) || alumnosMock.find(a => a.id === selectedStudents[0]);
         
         if (student) {
-          console.log('✅ ALUMNO ENCONTRADO EN DATOS LOCALES:', student);
+          console.log('ALUMNO ENCONTRADO EN DATOS LOCALES:', student);
           
           const tipoCurso = String(student.TipoDeCurso || 1);
           const modalidad = student.Modalidad === 2 ? 'virtual' : 'presencial';
@@ -353,12 +353,12 @@ const AlumnosSection = () => {
             modalidad: modalidad
           };
           
-          console.log('🎯 DATOS FALLBACK PARA EL FORMULARIO:', formData);
+          console.log('DATOS FALLBACK PARA EL FORMULARIO:', formData);
           setNewStudent(formData);
           setIsEditing(true);
           setIsModalOpen(true);
         } else {
-          console.log('❌ NO SE ENCONTRÓ EL ALUMNO NI EN BACKEND NI EN DATOS LOCALES');
+          console.log('NO SE ENCONTRÓ EL ALUMNO NI EN BACKEND NI EN DATOS LOCALES');
           alert('Error: No se pudieron cargar los datos del alumno');
         }
       } finally {
@@ -418,12 +418,12 @@ const AlumnosSection = () => {
         // Solo actualizar si realmente hay datos del backend
         if (res.data && Array.isArray(res.data) && res.data.length > 0) {
           setAlumnos(res.data);
-          console.log('✅ Alumnos cargados desde backend:', res.data.length);
+          console.log('Alumnos cargados desde backend:', res.data.length);
         } else {
-          console.log('⚠️ Backend sin datos, usando datos mock');
+          console.log('Backend sin datos, usando datos mock');
         }
       } catch (e) {
-        console.error('❌ ERROR al cargar alumnos, usando datos mock:', e);
+        console.error('ERROR al cargar alumnos, usando datos mock:', e);
       }
     })();
   }, []);
@@ -744,8 +744,8 @@ const AlumnosSection = () => {
 
   // Solo usar datos del backend, nunca datos mock
   const list = alumnos || [];
-  console.log('🎯 Lista a mostrar:', list);
-  console.log('🎯 Cantidad en lista:', list.length);
+  console.log('Lista a mostrar:', list);
+  console.log('Cantidad en lista:', list.length);
   
   const normalized = Array.isArray(list) ? list.map((alumno: any) => {
     const id = alumno.id ?? alumno.Id ?? alumno.alumnoId ?? alumno.AlumnoId;

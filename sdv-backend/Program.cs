@@ -45,6 +45,8 @@ builder.Services.AddScoped<IAlumnoService, AlumnoService>();
 builder.Services.AddScoped<IMaestroService, MaestroService>();
 builder.Services.AddScoped<IScheduleService, ScheduleService>();
 builder.Services.AddScoped<IMensualidadService, MensualidadService>();
+builder.Services.AddScoped<IAsistenciaService, AsistenciaService>();
+
 
 // CORS para permitir el frontend (Vite y otros dev servers)
 builder.Services.AddCors(options =>

@@ -17,6 +17,7 @@ namespace sdv_backend.Data.DataDB
         public DbSet<ClassSchedule> ClassSchedules => Set<ClassSchedule>();
         public DbSet<ClassStudent> ClassStudents => Set<ClassStudent>();
         public DbSet<Mensualidad> Mensualidades => Set<Mensualidad>();
+        public DbSet<Attendance> Attendances => Set<Attendance>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -71,6 +72,23 @@ namespace sdv_backend.Data.DataDB
 
             modelBuilder.Entity<ClassSchedule>()
                 .HasIndex(cs => new { cs.RoomId, cs.DayOfWeek, cs.TimeSlotId })
+                .IsUnique();
+
+            // Configuración de Attendance
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.ClassSchedule)
+                .WithMany()
+                .HasForeignKey(a => a.ClassScheduleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Attendance>()
+                .HasOne(a => a.Alumno)
+                .WithMany()
+                .HasForeignKey(a => a.AlumnoId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Attendance>()
+                .HasIndex(a => new { a.ClassScheduleId, a.AlumnoId, a.Date })
                 .IsUnique();
         }
     }

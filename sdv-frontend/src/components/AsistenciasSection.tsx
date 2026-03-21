@@ -1,461 +1,633 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Clock, Calendar, Users, CheckCircle2, XCircle, MapPin } from 'lucide-react';
+import { CheckCircle2, History, Search, Users, Calendar } from 'lucide-react';
+import { horariosApi, asistenciaApi } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
 
-interface Clase {
+interface ClassSchedule {
   id: number;
-  dia: string;
-  curso: string;
-  horario: string;
-  aula: string;
-  docente: string;
-  cargo: string;
-  alumnos: {
-    id: number;
-    nombre: string;
-    asistencia: 'S' | 'N' | 'J' | null;
-  }[];
+  roomName: string;
+  timeSlotDisplay: string;
+  maestroName: string;
+  dayOfWeekDisplay: string;
+  tipoDeCursoDisplay: string;
+  modalidadDisplay: string;
+  currentCapacity: number;
+  maxCapacity: number;
 }
 
+interface AlumnoInscrito {
+  id?: number;
+  alumnoId?: number;
+  nombre?: string;
+  alumnoNombre?: string;
+  nombreCompleto?: string;
+  alumnoName?: string;
+}
+
+const getAlumnoId = (a: AlumnoInscrito): number => a.id ?? a.alumnoId ?? 0;
+const getAlumnoNombre = (a: AlumnoInscrito): string =>
+  a.nombre ?? a.alumnoNombre ?? a.nombreCompleto ?? a.alumnoName ?? '—';
+
+interface HistorialItem {
+  Fecha?: string;
+  fecha?: string;
+  alumnoId?: number;
+  nombreAlumno?: string;
+  estadoCodigo?: string;
+  estado?: string;
+}
+
+const getHistorialNombre = (item: HistorialItem): string =>
+  item.nombreAlumno ?? '—';
+
+const formatFecha = (raw: string | undefined): string => {
+  if (!raw) return '—';
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return raw;
+  return d.toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric' });
+};
+
+const diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+const estadoBadge = (codigo: string | undefined) => {
+  if (codigo === 'S') return <Badge className="bg-green-100 text-green-700 border-green-200">Asistió</Badge>;
+  if (codigo === 'N') return <Badge className="bg-red-100 text-red-700 border-red-200">Faltó</Badge>;
+  if (codigo === 'J') return <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200">Justificado</Badge>;
+  return <Badge className="bg-gray-100 text-gray-500 border-gray-200">Sin registro</Badge>;
+};
+
 const AsistenciasSection = () => {
-  const [selectedClase, setSelectedClase] = useState<Clase | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
-  const [clasesDelDia, setClasesDelDia] = useState<Clase[]>([]);
+  const { toast } = useToast();
+
+  const [clases, setClases] = useState<ClassSchedule[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDia, setSelectedDia] = useState('all');
 
-  // Obtener el día de la semana actual
-  const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  const diaActual = diasSemana[new Date().getDay()];
+  const [isRegistrarOpen, setIsRegistrarOpen] = useState(false);
+  const [selectedClaseId, setSelectedClaseId] = useState<number | null>(null);
+  const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
+  const [alumnos, setAlumnos] = useState<AlumnoInscrito[]>([]);
+  const [asistencias, setAsistencias] = useState<Record<number, 'S' | 'N' | 'J' | null>>({});
+  const [loadingAlumnos, setLoadingAlumnos] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  // Datos de ejemplo de clases
-  const todasLasClases: Clase[] = [
-    // Seminarios
-    {
-      id: 1,
-      dia: 'Lunes',
-      curso: 'Seminario de Doblaje',
-      horario: '3:00 - 5:00 PM',
-      aula: 'A3',
-      docente: 'Dir. Armando LeBlohic',
-      cargo: 'Director',
-      alumnos: [
-        { id: 1, nombre: 'Sarah Alicia Gutiérrez Hernández', asistencia: null },
-        { id: 2, nombre: 'Ian Karim Villalba Romero', asistencia: null },
-        { id: 3, nombre: 'Cristian Jair Alcantar Cienfuegos', asistencia: null }
-      ]
-    },
-    {
-      id: 2,
-      dia: 'Lunes',
-      curso: 'Seminario de Locución',
-      horario: '5:30 - 7:30 PM',
-      aula: 'A2',
-      docente: 'Mtra. Ana Martínez',
-      cargo: 'Coordinadora',
-      alumnos: [
-        { id: 4, nombre: 'Emmanuel Mizques Martínez', asistencia: null },
-        { id: 5, nombre: 'Aaron Jesús Ramos García', asistencia: null },
-        { id: 6, nombre: 'María Fernanda López Torres', asistencia: null }
-      ]
-    },
-    {
-      id: 3,
-      dia: 'Lunes',
-      curso: 'Seminario de Actuación',
-      horario: '4:00 - 6:00 PM',
-      aula: 'A1',
-      docente: 'Dr. Carlos Rodríguez',
-      cargo: 'Profesor',
-      alumnos: [
-        { id: 7, nombre: 'Carlos Eduardo Mendoza Ruiz', asistencia: null },
-        { id: 8, nombre: 'Ana Sofía Valenzuela Díaz', asistencia: null },
-        { id: 9, nombre: 'Diego Alejandro Soto Vega', asistencia: null }
-      ]
-    },
-    // Diplomados
-    {
-      id: 4,
-      dia: 'Lunes',
-      curso: 'Diplomado N4 - Expresión Oral',
-      horario: '3:00 - 5:00 PM',
-      aula: 'B4',
-      docente: 'Mtra. María González',
-      cargo: 'Profesora',
-      alumnos: [
-        { id: 10, nombre: 'Valeria Guadalupe Morales', asistencia: null },
-        { id: 11, nombre: 'José Manuel Ríos Ortega', asistencia: null },
-        { id: 12, nombre: 'Laura Patricia Castro Luna', asistencia: null }
-      ]
-    },
-    {
-      id: 5,
-      dia: 'Lunes',
-      curso: 'Diplomado N5 - Doblaje',
-      horario: '4:00 - 6:00 PM',
-      aula: 'B1',
-      docente: 'Dir. Armando LeBlohic',
-      cargo: 'Director',
-      alumnos: [
-        { id: 13, nombre: 'Roberto Carlos Navarro', asistencia: null },
-        { id: 14, nombre: 'Gabriela Alejandra Torres', asistencia: null },
-        { id: 15, nombre: 'Miguel Ángel Flores', asistencia: null }
-      ]
-    },
-    {
-      id: 6,
-      dia: 'Lunes',
-      curso: 'Diplomado N6 - Locución',
-      horario: '6:00 - 8:00 PM',
-      aula: 'B2',
-      docente: 'Mtra. Ana Martínez',
-      cargo: 'Coordinadora',
-      alumnos: [
-        { id: 16, nombre: 'Isabella Martínez Ríos', asistencia: null },
-        { id: 17, nombre: 'Fernando Daniel Herrera', asistencia: null },
-        { id: 18, nombre: 'Camila Sofía Ramírez', asistencia: null }
-      ]
-    },
-    {
-      id: 7,
-      dia: 'Lunes',
-      curso: 'Diplomado N7 - Actuación',
-      horario: '5:00 - 7:00 PM',
-      aula: 'B3',
-      docente: 'Dr. Carlos Rodríguez',
-      cargo: 'Profesor',
-      alumnos: [
-        { id: 19, nombre: 'Juan Pablo Sánchez', asistencia: null },
-        { id: 20, nombre: 'Daniela Alejandra Luna', asistencia: null },
-        { id: 21, nombre: 'Luis Enrique Vega', asistencia: null }
-      ]
-    },
-    {
-      id: 8,
-      dia: 'Sábado',
-      curso: 'Seminario de Expresión Oral',
-      horario: '9:00 - 11:00 AM',
-      aula: 'A1',
-      docente: 'Mtra. María González',
-      cargo: 'Profesora',
-      alumnos: [
-        { id: 22, nombre: 'Andrea López Martínez', asistencia: null },
-        { id: 23, nombre: 'Luis Fernando Ruiz', asistencia: null },
-        { id: 24, nombre: 'Paola Jiménez Torres', asistencia: null }
-      ]
-    },
-    {
-      id: 9,
-      dia: 'Sábado',
-      curso: 'Diplomado N5 - Doblaje',
-      horario: '11:30 AM - 1:30 PM',
-      aula: 'B1',
-      docente: 'Dir. Armando LeBlohic',
-      cargo: 'Director',
-      alumnos: [
-        { id: 25, nombre: 'Jorge Luis Mendoza', asistencia: null },
-        { id: 26, nombre: 'Valeria Torres', asistencia: null },
-        { id: 27, nombre: 'Sofía Ramírez', asistencia: null }
-      ]
-    },
-    {
-      id: 10,
-      dia: 'Sábado',
-      curso: 'Seminario de Locución',
-      horario: '2:00 - 4:00 PM',
-      aula: 'A2',
-      docente: 'Mtra. Ana Martínez',
-      cargo: 'Coordinadora',
-      alumnos: [
-        { id: 28, nombre: 'Carlos Alberto Díaz', asistencia: null },
-        { id: 29, nombre: 'Fernanda Morales', asistencia: null },
-        { id: 30, nombre: 'Miguel Ángel Torres', asistencia: null }
-      ]
-    }
-  ];
+  const [isHistorialOpen, setIsHistorialOpen] = useState(false);
+  const [historial, setHistorial] = useState<HistorialItem[]>([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
+
+  const [isPorFechaOpen, setIsPorFechaOpen] = useState(false);
+  const [fechaConsulta, setFechaConsulta] = useState(new Date().toISOString().split('T')[0]);
+  const [asistenciaPorFecha, setAsistenciaPorFecha] = useState<HistorialItem[]>([]);
+  const [loadingPorFecha, setLoadingPorFecha] = useState(false);
+  const [savingRow, setSavingRow] = useState<number | null>(null);
 
   useEffect(() => {
-    // Filtrar las clases del día actual
-    const clasesHoy = todasLasClases.filter(clase => clase.dia === diaActual);
-    setClasesDelDia(clasesHoy);
-  }, [diaActual]);
+    loadClases();
+  }, []);
 
-  const handleClaseClick = (clase: Clase) => {
-    setSelectedClase(clase);
-    setIsModalOpen(true);
-  };
-
-  const handleAsistenciaChange = (alumnoId: number, asistencia: 'S' | 'N' | 'J') => {
-    if (selectedClase) {
-      setSelectedClase(prev => {
-        if (!prev) return null;
-        return {
-          ...prev,
-          alumnos: prev.alumnos.map(alumno =>
-            alumno.id === alumnoId ? { ...alumno, asistencia } : alumno
-          )
-        };
-      });
+  const loadClases = async () => {
+    try {
+      const response = await horariosApi.getAll<ClassSchedule[]>();
+      setClases(response.data);
+    } catch (error) {
+      console.error('Error loading clases:', error);
+      toast({ title: 'Error', description: 'No se pudieron cargar las clases.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSaveAsistencias = () => {
-    // Aquí iría la lógica para guardar las asistencias
-    console.log('Guardando asistencias:', selectedClase);
-    setIsModalOpen(false);
+  const handleOpenRegistrar = async (claseId: number) => {
+    setSelectedClaseId(claseId);
+    setIsRegistrarOpen(true);
+    setLoadingAlumnos(true);
+    try {
+      const response = await asistenciaApi.getAlumnosByClase<AlumnoInscrito[]>(claseId);
+      setAlumnos(response.data);
+      const init: Record<number, 'S' | 'N' | 'J' | null> = {};
+      response.data.forEach(a => { init[getAlumnoId(a)] = null; });
+      setAsistencias(init);
+    } catch (error) {
+      console.error('Error loading alumnos:', error);
+      toast({ title: 'Error', description: 'No se pudieron cargar los alumnos.', variant: 'destructive' });
+    } finally {
+      setLoadingAlumnos(false);
+    }
   };
 
-  const filteredClases = clasesDelDia.filter(clase =>
-    clase.curso.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    clase.docente.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const openPrintWindow = () => {
-    if (!selectedClase) return;
-    const width = 800;
-    const height = 600;
-    const left = (window.screen.width - width) / 2;
-    const top = (window.screen.height - height) / 2;
-    const printWindow = window.open('', '_blank', `width=${width},height=${height},left=${left},top=${top}`);
-    if (!printWindow) return;
-
-    const content = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Lista de Asistencias</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          .header { text-align: center; margin-bottom: 20px; }
-          .logo { max-width: 150px; margin-bottom: 10px; }
-          .details { margin-bottom: 20px; }
-          table { width: 100%; border-collapse: collapse; }
-          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f2f2f2; }
-          .attendance { text-align: center; }
-          .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-          @media (max-width: 600px) {
-            body { margin: 10px; }
-            .logo { max-width: 100px; }
-            h1 { font-size: 20px; }
-            .details p { font-size: 14px; }
-            th, td { padding: 5px; font-size: 14px; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <img src="/path/to/logo.png" alt="Logo" class="logo">
-          <h1>Lista de Asistencias</h1>
-          <div class="details">
-            <p><strong>Curso:</strong> ${selectedClase.curso}</p>
-            <p><strong>Docente:</strong> ${selectedClase.docente}</p>
-            <p><strong>Aula:</strong> ${selectedClase.aula}</p>
-            <p><strong>Horario:</strong> ${selectedClase.horario}</p>
-            <p><strong>Fecha:</strong> ${fecha}</p>
-          </div>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Nombre del Alumno</th>
-              <th>Asistencia</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${selectedClase.alumnos.map(alumno => `
-              <tr>
-                <td>${alumno.nombre}</td>
-                <td class="attendance">${alumno.asistencia || '-'}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div class="footer">
-          <p>Impreso el ${new Date().toLocaleString()}</p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    printWindow.document.write(content);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
+  const handleOpenHistorial = async (claseId: number) => {
+    setSelectedClaseId(claseId);
+    setIsHistorialOpen(true);
+    setLoadingHistorial(true);
+    try {
+      const response = await asistenciaApi.getHistorial<HistorialItem[] | HistorialItem>(claseId);
+      const data = response.data;
+      setHistorial(Array.isArray(data) ? data : data ? [data] : []);
+    } catch (error) {
+      console.error('Error loading historial:', error);
+      toast({ title: 'Error', description: 'No se pudo cargar el historial.', variant: 'destructive' });
+    } finally {
+      setLoadingHistorial(false);
+    }
   };
+
+  const handleOpenPorFecha = (claseId: number) => {
+    setSelectedClaseId(claseId);
+    setAsistenciaPorFecha([]);
+    setFechaConsulta(new Date().toISOString().split('T')[0]);
+    setIsPorFechaOpen(true);
+  };
+
+  const fetchPorFecha = async (claseId: number, date: string) => {
+    setLoadingPorFecha(true);
+    try {
+      // Get attendance records for this date
+      const historialRes = await asistenciaApi.getHistorial<HistorialItem[] | HistorialItem>(claseId);
+      const all = Array.isArray(historialRes.data) ? historialRes.data : historialRes.data ? [historialRes.data] : [];
+      const registered = all.filter(item => {
+        const itemDate = (item.Fecha ?? item.fecha ?? '').split('T')[0];
+        return itemDate === date;
+      });
+
+      // Get all enrolled students and merge — show everyone, with or without a record
+      const alumnosRes = await asistenciaApi.getAlumnosByClase<AlumnoInscrito[]>(claseId);
+      const todosAlumnos = Array.isArray(alumnosRes.data) ? alumnosRes.data : [];
+      const registeredIds = new Set(registered.map(r => r.alumnoId));
+
+      const sinRegistro: HistorialItem[] = todosAlumnos
+        .filter(a => !registeredIds.has(getAlumnoId(a)))
+        .map(a => ({
+          alumnoId: getAlumnoId(a),
+          nombreAlumno: getAlumnoNombre(a),
+          estadoCodigo: undefined,
+          Fecha: date,
+        }));
+
+      setAsistenciaPorFecha([...registered, ...sinRegistro]);
+    } catch (error) {
+      console.error('Error loading asistencia por fecha:', error);
+      toast({ title: 'Error', description: 'No se pudo cargar la asistencia para esa fecha.', variant: 'destructive' });
+    } finally {
+      setLoadingPorFecha(false);
+    }
+  };
+
+  const handleAsistenciaChange = (alumnoId: number, estado: 'S' | 'N' | 'J') => {
+    setAsistencias(prev => ({
+      ...prev,
+      [alumnoId]: prev[alumnoId] === estado ? null : estado,
+    }));
+  };
+
+  const pendienteCount = alumnos.filter(a => !asistencias[getAlumnoId(a)]).length;
+
+  const handleSaveAsistencia = async () => {
+    if (!selectedClaseId) return;
+    setSaving(true);
+    try {
+      if (pendienteCount > 0) {
+        toast({ title: 'Atención', description: `Faltan ${pendienteCount} alumno(s) por marcar.`, variant: 'destructive' });
+        setSaving(false);
+        return;
+      }
+      const statusMap: Record<string, number> = { S: 1, N: 2, J: 3 };
+      await asistenciaApi.registrar({
+        classScheduleId: selectedClaseId,
+        fecha,
+        asistencias: Object.entries(asistencias)
+          .filter(([, estado]) => estado !== null)
+          .map(([alumnoId, estado]) => ({
+            alumnoId: parseInt(alumnoId),
+            status: statusMap[estado as string],
+          })),
+      });
+      toast({ title: 'Éxito', description: 'Asistencia registrada correctamente.' });
+      setIsRegistrarOpen(false);
+    } catch (error) {
+      console.error('Error saving asistencia:', error);
+      toast({ title: 'Error', description: 'No se pudo guardar la asistencia.', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateEstado = async (item: HistorialItem, nuevoEstado: 'S' | 'N' | 'J') => {
+    if (!selectedClaseId || !item.alumnoId || item.estadoCodigo === nuevoEstado) return;
+    const statusMap: Record<string, number> = { S: 1, N: 2, J: 3 };
+    setSavingRow(item.alumnoId);
+    try {
+      await asistenciaApi.registrar({
+        classScheduleId: selectedClaseId,
+        fecha: fechaConsulta,
+        asistencias: [{ alumnoId: item.alumnoId, status: statusMap[nuevoEstado] }],
+      });
+      setAsistenciaPorFecha(prev =>
+        prev.map(r => r.alumnoId === item.alumnoId ? { ...r, estadoCodigo: nuevoEstado } : r)
+      );
+      toast({ title: 'Actualizado', description: `Estado de ${item.nombreAlumno} cambiado a ${nuevoEstado === 'S' ? 'Asistió' : nuevoEstado === 'N' ? 'Faltó' : 'Justificado'}.` });
+    } catch (error) {
+      console.error('Error updating estado:', error);
+      toast({ title: 'Error', description: 'No se pudo actualizar el estado.', variant: 'destructive' });
+    } finally {
+      setSavingRow(null);
+    }
+  };
+
+  const filteredClases = clases.filter(clase => {
+    const matchesSearch =
+      searchTerm === '' ||
+      clase.tipoDeCursoDisplay?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      clase.maestroName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      clase.roomName?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesDia = selectedDia === 'all' || clase.dayOfWeekDisplay === selectedDia;
+    return matchesSearch && matchesDia;
+  });
+
+  const selectedClase = clases.find(c => c.id === selectedClaseId);
 
   return (
-    <div className="w-screen min-h-screen bg-[#f8fafc] p-6">
-      <div className="mx-auto">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-3xl font-bold text-gray-800">Control de Asistencias</h2>
-              <p className="text-base text-gray-600">Registro de asistencia diaria</p>
+    <div className="p-3 sm:p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 space-y-4 sm:space-y-0">
+            <div className="text-center sm:text-left">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Control de Asistencias</h2>
+              <p className="text-gray-600 mt-1">Administrador</p>
             </div>
-            <div className="flex items-center space-x-6">
-              <div className="text-right">
-                <p className="text-base text-gray-500">Fecha</p>
-                <p className="text-2xl font-bold text-blue-600">{fecha}</p>
+            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+              <div className="text-center sm:text-right">
+                <p className="text-sm text-gray-500">Total de Clases</p>
+                <p className="text-2xl font-bold text-blue-600">{clases.length}</p>
               </div>
               <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-                <Calendar className="w-7 h-7 text-blue-600" />
+                <CheckCircle2 className="w-6 h-6 text-blue-600" />
               </div>
             </div>
           </div>
         </div>
 
-        <Card className="shadow-lg border-0">
-          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-t-lg py-6">
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Users className="w-6 h-6" />
-                <span className="text-xl">Clases del día - {diaActual}</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Input
-                  placeholder="Buscar clase o docente..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="max-w-xs text-base bg-white/10 border-white/20 text-white placeholder:text-white/70"
-                />
+        <Card className="shadow-xl border-0">
+          <CardHeader className="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-t-lg p-3 sm:p-6">
+            <CardTitle className="flex flex-col space-y-4 lg:flex-row lg:items-center lg:justify-between lg:space-y-0">
+              <div className="flex items-center space-x-3 justify-center lg:justify-start">
+                <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
+                <span className="text-lg sm:text-xl">Gestión de Asistencias</span>
               </div>
             </CardTitle>
           </CardHeader>
-          <CardContent className="p-0">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-              {filteredClases.map((clase) => (
-                <Card
-                  key={clase.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow h-full"
-                  onClick={() => handleClaseClick(clase)}
-                >
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge variant="secondary" className="text-sm">
-                        {clase.curso}
-                      </Badge>
-                      <span className="text-base text-gray-500 flex items-center">
-                        <Clock className="w-5 h-5 mr-1" />
-                        {clase.horario}
-                      </span>
-                    </div>
-                    <h3 className="font-semibold text-gray-900 mb-3 text-lg">{clase.docente}</h3>
-                    <div className="flex items-center justify-between text-base text-gray-600 mb-2">
-                      <span className="flex items-center">
-                        <MapPin className="w-5 h-5 mr-1" />
-                        {clase.aula}
-                      </span>
-                      <span>{clase.cargo}</span>
-                    </div>
-                    <div className="mt-4 pt-4 border-t">
-                      <div className="flex items-center justify-between text-base">
-                        <span className="text-gray-600">Total alumnos:</span>
-                        <span className="font-semibold">{clase.alumnos.length}</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Modal de asistencia */}
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="max-w-2xl w-full max-h-[90vh] overflow-y-auto p-8">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-bold text-gray-800">
-                Registrar Asistencia
-              </DialogTitle>
-            </DialogHeader>
-            {selectedClase && (
-              <div className="mt-6">
-                <div className="bg-blue-50 p-6 rounded-lg mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-blue-900 text-lg">{selectedClase.curso}</h3>
-                    <Badge variant="secondary" className="text-sm">
-                      {selectedClase.horario}
-                    </Badge>
-                  </div>
-                  <div className="text-base text-blue-700">
-                    <p>Docente: {selectedClase.docente}</p>
-                    <p>Aula: {selectedClase.aula}</p>
-                  </div>
+          <CardContent className="p-0">
+            <div className="p-3 sm:p-6 bg-gray-50 border-b">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1 max-w-full sm:max-w-sm">
+                  <Input
+                    placeholder="Buscar curso, maestro o aula..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2 w-full rounded-xl border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                  <Search className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse text-base">
-                    <thead>
-                      <tr className="bg-gray-100">
-                        <th className="border p-3 text-left">Nombre del Alumno</th>
-                        <th className="border p-3 text-center">Asistencia</th>
+                <Select value={selectedDia} onValueChange={setSelectedDia}>
+                  <SelectTrigger className="w-full sm:w-48 rounded-xl border-gray-300">
+                    <SelectValue placeholder="Todos los días" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los días</SelectItem>
+                    {diasSemana.map(dia => (
+                      <SelectItem key={dia} value={dia}>{dia}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="flex items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-100 text-gray-600 uppercase text-xs">
+                      <th className="px-4 py-3 text-left">Curso</th>
+                      <th className="px-4 py-3 text-left">Maestro</th>
+                      <th className="px-4 py-3 text-left">Día</th>
+                      <th className="px-4 py-3 text-left">Horario</th>
+                      <th className="px-4 py-3 text-left">Aula</th>
+                      <th className="px-4 py-3 text-left">Alumnos</th>
+                      <th className="px-4 py-3 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredClases.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="text-center py-16 text-gray-500">
+                          <Users className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+                          No se encontraron clases
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {selectedClase.alumnos.map((alumno) => (
-                        <tr key={alumno.id} className="hover:bg-gray-50">
-                          <td className="border p-3">{alumno.nombre}</td>
-                          <td className="border p-3 text-center">
-                            <div className="flex flex-wrap justify-center gap-3">
-                              {(['S', 'N', 'J'] as const).map((tipo) => (
-                                <Button
-                                  key={tipo}
-                                  size="lg"
-                                  variant="outline"
-                                  className={`h-10 px-6 text-lg font-bold border-2
-                                    ${alumno.asistencia === tipo ?
-                                      tipo === 'S' ? 'border-green-500 bg-green-100 text-green-700' :
-                                      tipo === 'N' ? 'border-red-500 bg-red-100 text-red-700' :
-                                      'border-yellow-500 bg-yellow-100 text-yellow-700'
-                                    : 'border-gray-300'}
-                                  `}
-                                  onClick={() => handleAsistenciaChange(alumno.id, tipo)}
-                                >
-                                  {tipo}
-                                </Button>
-                              ))}
+                    ) : (
+                      filteredClases.map((clase, index) => (
+                        <tr
+                          key={clase.id}
+                          className={`border-b hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50/60'}`}
+                        >
+                          <td className="px-4 py-3 font-medium text-gray-800">{clase.tipoDeCursoDisplay}</td>
+                          <td className="px-4 py-3 text-gray-600">{clase.maestroName}</td>
+                          <td className="px-4 py-3">
+                            <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">
+                              {clase.dayOfWeekDisplay}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">{clase.timeSlotDisplay}</td>
+                          <td className="px-4 py-3 text-gray-600">{clase.roomName}</td>
+                          <td className="px-4 py-3 text-gray-600">
+                            {clase.currentCapacity}/{clase.maxCapacity}
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex justify-end gap-2 flex-wrap">
+                              <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 text-white text-xs"
+                                onClick={() => handleOpenRegistrar(clase.id)}
+                              >
+                                <CheckCircle2 className="w-3 h-3 mr-1" />
+                                Tomar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-blue-300 text-blue-600 hover:bg-blue-50 text-xs"
+                                onClick={() => handleOpenHistorial(clase.id)}
+                              >
+                                <History className="w-3 h-3 mr-1" />
+                                Historial
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-purple-300 text-purple-600 hover:bg-purple-50 text-xs"
+                                onClick={() => handleOpenPorFecha(clase.id)}
+                              >
+                                <Calendar className="w-3 h-3 mr-1" />
+                                Por Fecha
+                              </Button>
                             </div>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                <DialogFooter className="mt-8 flex flex-wrap gap-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsModalOpen(false)}
-                    className="border-gray-300 hover:bg-gray-100 text-lg px-6 h-10"
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    onClick={handleSaveAsistencias}
-                    className="bg-green-500 hover:bg-green-600 text-lg px-6 h-10"
-                  >
-                    Guardar Asistencias
-                  </Button>
-                  <Button
-                    onClick={openPrintWindow}
-                    className="bg-blue-500 hover:bg-blue-600 text-lg px-6 h-10"
-                  >
-                    Imprimir lista
-                  </Button>
-                </DialogFooter>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             )}
-          </DialogContent>
-        </Dialog>
+          </CardContent>
+        </Card>
       </div>
+
+      {/* Modal: Tomar Asistencia */}
+      <Dialog open={isRegistrarOpen} onOpenChange={setIsRegistrarOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-gray-800">
+              <CheckCircle2 className="w-5 h-5 text-green-600" />
+              Tomar Asistencia
+            </DialogTitle>
+            <DialogDescription className="sr-only">Registra la asistencia de los alumnos para esta clase.</DialogDescription>
+          </DialogHeader>
+
+          {selectedClase && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 rounded-lg p-3 text-sm grid grid-cols-2 gap-2 border border-blue-100">
+                <div><span className="text-gray-500">Curso:</span> <span className="font-medium">{selectedClase.tipoDeCursoDisplay}</span></div>
+                <div><span className="text-gray-500">Maestro:</span> <span className="font-medium">{selectedClase.maestroName}</span></div>
+                <div><span className="text-gray-500">Día:</span> <span className="font-medium">{selectedClase.dayOfWeekDisplay}</span></div>
+                <div><span className="text-gray-500">Horario:</span> <span className="font-medium">{selectedClase.timeSlotDisplay}</span></div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Label className="text-sm font-medium text-gray-700">Fecha:</Label>
+                <Input
+                  type="date"
+                  value={fecha}
+                  onChange={e => setFecha(e.target.value)}
+                  className="w-44 rounded-lg border-gray-300"
+                />
+              </div>
+
+              {loadingAlumnos ? (
+                <div className="flex justify-center py-8">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600" />
+                </div>
+              ) : alumnos.length === 0 ? (
+                <p className="text-center text-gray-500 py-6 text-sm">No hay alumnos inscritos en esta clase.</p>
+              ) : (
+                <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+                  <div className="flex justify-between text-xs text-gray-400 px-2 pb-1 border-b">
+                    <span>Alumno</span>
+                    <div className="flex items-center gap-3">
+                      {pendienteCount > 0 && (
+                        <span className="text-orange-500 font-medium">{pendienteCount} sin marcar</span>
+                      )}
+                      <span>S = Sí &nbsp;|&nbsp; N = No &nbsp;|&nbsp; J = Justificado</span>
+                    </div>
+                  </div>
+                  {alumnos.map(alumno => {
+                    const aId = getAlumnoId(alumno);
+                    return (
+                    <div
+                      key={aId}
+                      className={`flex items-center justify-between rounded-lg px-3 py-2 border transition-colors ${
+                        asistencias[aId] === null || asistencias[aId] === undefined
+                          ? 'bg-orange-50 border-orange-200'
+                          : 'bg-gray-50 border-gray-100'
+                      }`}
+                    >
+                      <span className="text-sm font-medium text-gray-700 truncate max-w-[55%]">{getAlumnoNombre(alumno)}</span>
+                      <div className="flex gap-1">
+                        {(['S', 'N', 'J'] as const).map(estado => (
+                          <button
+                            key={estado}
+                            type="button"
+                            onClick={() => handleAsistenciaChange(aId, estado)}
+                            className={`w-9 h-9 rounded-full text-xs font-bold border-2 transition-all ${
+                              asistencias[aId] === estado
+                                ? estado === 'S'
+                                  ? 'bg-green-500 border-green-500 text-white shadow-sm'
+                                  : estado === 'N'
+                                  ? 'bg-red-500 border-red-500 text-white shadow-sm'
+                                  : 'bg-yellow-400 border-yellow-400 text-white shadow-sm'
+                                : 'bg-white border-gray-300 text-gray-400 hover:border-gray-400'
+                            }`}
+                          >
+                            {estado}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter className="mt-2">
+            <Button variant="outline" onClick={() => setIsRegistrarOpen(false)}>Cancelar</Button>
+            <Button
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={handleSaveAsistencia}
+              disabled={saving || alumnos.length === 0 || pendienteCount > 0}
+            >
+              {saving ? 'Guardando...' : 'Guardar Asistencia'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Historial */}
+      <Dialog open={isHistorialOpen} onOpenChange={setIsHistorialOpen}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-gray-800">
+              <History className="w-5 h-5 text-blue-600" />
+              Historial — {selectedClase?.tipoDeCursoDisplay}
+            </DialogTitle>
+            <DialogDescription className="sr-only">Historial completo de asistencias de la clase.</DialogDescription>
+          </DialogHeader>
+
+          {loadingHistorial ? (
+            <div className="flex justify-center py-10">
+              <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-blue-600" />
+            </div>
+          ) : historial.length === 0 ? (
+            <p className="text-center text-gray-500 py-10 text-sm">No hay registros de asistencia para esta clase.</p>
+          ) : (
+            <div className="overflow-x-auto max-h-96">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-gray-100 z-10">
+                  <tr className="text-gray-600 uppercase text-xs">
+                    <th className="px-3 py-2 text-left">Fecha</th>
+                    <th className="px-3 py-2 text-left">Alumno</th>
+                    <th className="px-3 py-2 text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historial.map((item, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50 transition-colors">
+                      <td className="px-3 py-2 text-gray-600">{formatFecha(item.Fecha ?? item.fecha)}</td>
+                      <td className="px-3 py-2 font-medium text-gray-800">{getHistorialNombre(item)}</td>
+                      <td className="px-3 py-2 text-center">{estadoBadge(item.estadoCodigo)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsHistorialOpen(false)}>Cerrar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Por Fecha */}
+      <Dialog open={isPorFechaOpen} onOpenChange={setIsPorFechaOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-lg font-bold text-gray-800">
+              <Calendar className="w-5 h-5 text-purple-600" />
+              Asistencia por Fecha — {selectedClase?.tipoDeCursoDisplay}
+            </DialogTitle>
+            <DialogDescription className="sr-only">Consulta y edita la asistencia de los alumnos por fecha.</DialogDescription>
+          </DialogHeader>
+
+          <div className="flex items-center gap-3 mb-4">
+            <Label className="text-sm font-medium text-gray-700">Fecha:</Label>
+            <Input
+              type="date"
+              value={fechaConsulta}
+              onChange={e => setFechaConsulta(e.target.value)}
+              className="w-44 rounded-lg border-gray-300"
+            />
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-purple-300 text-purple-600 hover:bg-purple-50"
+              onClick={() => selectedClaseId && fetchPorFecha(selectedClaseId, fechaConsulta)}
+            >
+              Buscar
+            </Button>
+          </div>
+
+          {loadingPorFecha ? (
+            <div className="flex justify-center py-10">
+              <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-purple-600" />
+            </div>
+          ) : asistenciaPorFecha.length === 0 ? (
+            <p className="text-center text-gray-500 py-8 text-sm">No hay registros para esta fecha. Selecciona una fecha y presiona Buscar.</p>
+          ) : (
+            <div className="overflow-x-auto max-h-96">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-gray-100 z-10">
+                  <tr className="text-gray-600 uppercase text-xs">
+                    <th className="px-3 py-2 text-left">Alumno</th>
+                    <th className="px-3 py-2 text-center">Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {asistenciaPorFecha.map((item, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50 transition-colors">
+                      <td className="px-3 py-2 font-medium text-gray-800">{getHistorialNombre(item)}</td>
+                      <td className="px-3 py-2">
+                        <div className="flex items-center justify-center gap-1">
+                          {savingRow === item.alumnoId ? (
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-purple-600" />
+                          ) : (['S', 'N', 'J'] as const).map(estado => (
+                            <button
+                              key={estado}
+                              type="button"
+                              onClick={() => handleUpdateEstado(item, estado)}
+                              className={`w-9 h-9 rounded-full text-xs font-bold border-2 transition-all ${
+                                item.estadoCodigo === estado
+                                  ? estado === 'S'
+                                    ? 'bg-green-500 border-green-500 text-white shadow-sm'
+                                    : estado === 'N'
+                                    ? 'bg-red-500 border-red-500 text-white shadow-sm'
+                                    : 'bg-yellow-400 border-yellow-400 text-white shadow-sm'
+                                  : 'bg-white border-gray-300 text-gray-400 hover:border-gray-400'
+                              }`}
+                            >
+                              {estado}
+                            </button>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsPorFechaOpen(false)}>Cerrar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
 
-export default AsistenciasSection; 
+export default AsistenciasSection;
